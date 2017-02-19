@@ -19,17 +19,15 @@
         android:id="@+id/imageViewPicture"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="183dp" />
+        android:layout_marginBottom="183dp"
+        android:adjustViewBounds="true" />
 
     <Button
         android:text="Start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/imageViewPicture"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="28dp"
-        android:layout_marginStart="28dp"
         android:layout_marginBottom="115dp"
         android:id="@+id/btnStart" />
 
@@ -45,6 +43,7 @@
         android:text="Stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignRight="@id/imageViewPicture"
         android:layout_alignTop="@+id/btnPause"
         android:layout_toRightOf="@+id/btnPause"
         android:layout_toEndOf="@+id/btnPause"
@@ -56,9 +55,9 @@
         android:text="View Tracks"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btnPause"
-        android:layout_marginTop="26dp"
+        android:layout_marginTop="17dp"
         android:id="@+id/btnViewTracks"
+        android:layout_below="@+id/btnPause"
         android:layout_alignLeft="@+id/btnStart"
         android:layout_alignStart="@+id/btnStart"
         android:layout_alignRight="@+id/btnStop"
