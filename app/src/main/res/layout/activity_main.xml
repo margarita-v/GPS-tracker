@@ -20,11 +20,10 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/pict"
             android:id="@+id/imageViewPicture"
-            android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
             android:layout_weight="1"
             android:cropToPadding="false" />
@@ -70,12 +69,11 @@
         android:layout_below="@id/linearLayout"
         android:layout_centerHorizontal="true"
         android:layout_alignLeft="@id/linearLayoutPicture"
-        android:layout_alignRight="@id/linearLayoutPicture"
-        android:layout_weight="1">
+        android:layout_alignRight="@id/linearLayoutPicture">
 
         <Button
             android:text="View Tracks"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/btnViewTracks"
             android:layout_weight="1" />
