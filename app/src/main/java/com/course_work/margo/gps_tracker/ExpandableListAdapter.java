@@ -1,6 +1,7 @@
 package com.course_work.margo.gps_tracker;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +12,16 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter {
+public class ExpandableListAdapter extends BaseExpandableListAdapter implements View.OnClickListener {
 
     Context context;
     List<String> trackHeaders;
     HashMap<String, List<String>> trackItems;
     ImageButton imgBtnMap, imgBtnDelete;
 
-    public ExpandableListAdapter(Context context, List<String> headers, HashMap<String, List<String>> items) {
+    public ExpandableListAdapter(Context context,
+                                 List<String> headers,
+                                 HashMap<String, List<String>> items) {
         this.context = context;
         this.trackHeaders = headers;
         this.trackItems = items;
@@ -76,6 +79,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         imgBtnMap = (ImageButton) convertView.findViewById(R.id.imgBtnMap);
         imgBtnDelete = (ImageButton) convertView.findViewById(R.id.imgBtnDelete);
 
+        imgBtnMap.setOnClickListener(this);
+        imgBtnDelete.setOnClickListener(this);
+
         return convertView;
     }
 
@@ -97,5 +103,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.imgBtnMap:
+                Intent intent = new Intent(context, MapsActivity.class);
+                context.startActivity(intent);
+                break;
+            case R.id.imgBtnDelete:
+                break;
+        }
     }
 }
