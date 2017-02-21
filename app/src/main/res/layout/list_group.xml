@@ -25,8 +25,16 @@
             android:gravity="end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <ImageButton
-                android:id="@+id/imageButton"
+                android:id="@+id/imgBtnMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                app:srcCompat="@android:drawable/ic_menu_mapmode" />
+
+            <ImageButton
+                android:id="@+id/imgBtnDelete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:focusable="false"

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.HashMap;
@@ -15,6 +16,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     Context context;
     List<String> trackHeaders;
     HashMap<String, List<String>> trackItems;
+    ImageButton imgBtnMap, imgBtnDelete;
 
     public ExpandableListAdapter(Context context, List<String> headers, HashMap<String, List<String>> items) {
         this.context = context;
@@ -70,6 +72,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         TextView lblListHeader = (TextView) convertView.findViewById(R.id.trackName);
         lblListHeader.setText(headerTitle);
+
+        imgBtnMap = (ImageButton) convertView.findViewById(R.id.imgBtnMap);
+        imgBtnDelete = (ImageButton) convertView.findViewById(R.id.imgBtnDelete);
 
         return convertView;
     }
