@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">GPS-tracker</string>
     <string name="title_activity_maps">Map</string>
+    <string name="delete_confirm_title">Confirmation</string>
+    <string name="delete_confirm_message">Are you sure to delete this track?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
 </resources>

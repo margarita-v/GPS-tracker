@@ -1,6 +1,8 @@
 package com.course_work.margo.gps_tracker;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +14,7 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter implements View.OnClickListener {
+public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     Context context;
     List<String> trackHeaders;
@@ -66,7 +68,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        String headerTitle = (String) getGroup(groupPosition);
+        final String headerTitle = (String) getGroup(groupPosition);
         if (convertView == null) {
             LayoutInflater inflater= (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -79,8 +81,40 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
         imgBtnMap = (ImageButton) convertView.findViewById(R.id.imgBtnMap);
         imgBtnDelete = (ImageButton) convertView.findViewById(R.id.imgBtnDelete);
 
-        imgBtnMap.setOnClickListener(this);
-        imgBtnDelete.setOnClickListener(this);
+        // View track on map
+        imgBtnMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MapsActivity.class);
+                context.startActivity(intent);
+            }
+        });
+        // Delete chosen track
+        imgBtnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(R.string.delete_confirm_title)
+                        .setMessage(R.string.delete_confirm_message);
+
+                builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked OK button
+                        trackHeaders.remove(headerTitle);
+                        notifyDataSetChanged();
+                    }
+                });
+
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
 
         return convertView;
     }
@@ -103,17 +137,5 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter implements 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.imgBtnMap:
-                Intent intent = new Intent(context, MapsActivity.class);
-                context.startActivity(intent);
-                break;
-            case R.id.imgBtnDelete:
-                break;
-        }
     }
 }
