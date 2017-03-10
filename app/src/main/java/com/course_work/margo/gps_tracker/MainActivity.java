@@ -29,6 +29,8 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener, ConnectionCallbacks,
         OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult> {
@@ -41,10 +43,11 @@ public class MainActivity extends AppCompatActivity implements
     protected LocationSettingsRequest mLocationSettingsRequest;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    private static final long UPDATE_INTERVAL = 10000;
+    private static final long UPDATE_INTERVAL = 1000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
     TextView tvLocation;
+    ArrayList<String> trackItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements
         btnViewTracks.setOnClickListener(this);
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
+        trackItems = new ArrayList<>();
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -74,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements
         switch (v.getId()) {
             case R.id.btnViewTracks:
                 Intent intent = new Intent(this, TracksActivity.class);
+                intent.putExtra("trackName", "My track");
+                intent.putStringArrayListExtra("trackItems", trackItems);
                 startActivity(intent);
                 break;
             case R.id.btnStart:
@@ -161,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements
                     // in onActivityResult().
                     status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
                 } catch (IntentSender.SendIntentException e) {
-
+                    e.printStackTrace();
                 }
                 break;
             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -205,11 +211,10 @@ public class MainActivity extends AppCompatActivity implements
                 this
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
-            public void onResult(Status status) {
+            public void onResult(@NonNull Status status) {
 
             }
         });
-
     }
 
     protected void stopLocationUpdates() {
@@ -221,25 +226,28 @@ public class MainActivity extends AppCompatActivity implements
                 this
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
-            public void onResult(Status status) {
+            public void onResult(@NonNull Status status) {
 
             }
         });
     }
 
     private void updateLocationUI() {
-        if (mCurrentLocation != null)
-            tvLocation.setText("Latitude: " + mCurrentLocation.getLatitude() +
-                    " , Longtitude: " + mCurrentLocation.getLongitude());
+        if (mCurrentLocation != null) {
+            String item = "Latitude: " + mCurrentLocation.getLatitude() +
+                    " , Longitude: " + mCurrentLocation.getLongitude();
+            tvLocation.setText(item);
+            trackItems.add(item);
+        }
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (mCurrentLocation == null) {
             if (ActivityCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this,
-                            android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
