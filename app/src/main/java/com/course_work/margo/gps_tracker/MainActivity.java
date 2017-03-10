@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.course_work.margo.gps_tracker.location.Track;
+import com.course_work.margo.gps_tracker.location.TrackList;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -30,6 +32,7 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener, ConnectionCallbacks,
@@ -47,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
     TextView tvLocation;
-    ArrayList<String> trackItems;
+    Track currentTrack;
+    ArrayList<Location> trackItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +81,10 @@ public class MainActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnViewTracks:
+                TrackList.addTrack(currentTrack);
                 Intent intent = new Intent(this, TracksActivity.class);
-                intent.putExtra("trackName", "My track");
-                intent.putStringArrayListExtra("trackItems", trackItems);
+                //intent.putExtra("trackName", "My track");
+                //intent.putParcelableArrayListExtra("trackItems", trackItems);
                 startActivity(intent);
                 break;
             case R.id.btnStart:
@@ -159,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements
         final Status status = locationSettingsResult.getStatus();
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
+                currentTrack = new Track("1");
                 startLocationUpdates();
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
@@ -237,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements
             String item = "Latitude: " + mCurrentLocation.getLatitude() +
                     " , Longitude: " + mCurrentLocation.getLongitude();
             tvLocation.setText(item);
-            trackItems.add(item);
+            trackItems.add(mCurrentLocation);
         }
     }
 
@@ -275,6 +281,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
+        currentTrack.addLocation(mCurrentLocation);
         updateLocationUI();
         Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
     }

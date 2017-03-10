@@ -67,7 +67,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+    public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         final String headerTitle = (String) getGroup(groupPosition);
         if (convertView == null) {
             LayoutInflater inflater= (LayoutInflater) this.context
@@ -86,6 +86,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, MapsActivity.class);
+                intent.putExtra("trackNumber", groupPosition);
                 context.startActivity(intent);
             }
         });
