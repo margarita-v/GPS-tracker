@@ -28,10 +28,11 @@ public class TracksActivity extends AppCompatActivity {
         parentItems = new ArrayList<>();
         childItems = new HashMap<>();
 
-        int i = parentItems.size();
+        int i = 0;
         for (Track track: TrackList.getTrackList()) {
             parentItems.add(track.getName());
             childItems.put(parentItems.get(i), track.getItemsToString());
+            i++;
         }
 
         adapter = new ExpandableListAdapter(this, parentItems, childItems);
