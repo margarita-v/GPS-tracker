@@ -31,8 +31,10 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener, ConnectionCallbacks,
@@ -51,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements
 
     TextView tvLocation;
     Track currentTrack;
-    ArrayList<Location> trackItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements
         btnViewTracks.setOnClickListener(this);
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
-        trackItems = new ArrayList<>();
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -83,8 +83,6 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.btnViewTracks:
                 TrackList.addTrack(currentTrack);
                 Intent intent = new Intent(this, TracksActivity.class);
-                //intent.putExtra("trackName", "My track");
-                //intent.putParcelableArrayListExtra("trackItems", trackItems);
                 startActivity(intent);
                 break;
             case R.id.btnStart:
@@ -164,7 +162,10 @@ public class MainActivity extends AppCompatActivity implements
         final Status status = locationSettingsResult.getStatus();
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
-                currentTrack = new Track("1");
+                // Use current date and time as a track's name
+                DateFormat dateFormat = DateFormat.getDateTimeInstance();
+                Calendar calendar = Calendar.getInstance();
+                currentTrack = new Track(dateFormat.format(calendar.getTime()));
                 startLocationUpdates();
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
@@ -243,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements
             String item = "Latitude: " + mCurrentLocation.getLatitude() +
                     " , Longitude: " + mCurrentLocation.getLongitude();
             tvLocation.setText(item);
-            trackItems.add(mCurrentLocation);
         }
     }
 

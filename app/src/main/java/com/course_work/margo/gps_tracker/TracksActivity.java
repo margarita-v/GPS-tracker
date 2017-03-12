@@ -1,7 +1,5 @@
 package com.course_work.margo.gps_tracker;
 
-import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ExpandableListView;
@@ -27,23 +25,8 @@ public class TracksActivity extends AppCompatActivity {
 
         elvTracks = (ExpandableListView) findViewById(R.id.elvTracks);
 
-        //prepareListData();
-
         parentItems = new ArrayList<>();
         childItems = new HashMap<>();
-
-        /*Intent intent = getIntent();
-        String trackName = intent.getStringExtra("trackName");
-        ArrayList<Location> trackItems = intent.getParcelableArrayListExtra("trackItems");
-        parentItems.add(trackName);
-        int size = parentItems.size() - 1;
-        List<String> items = new ArrayList<>();
-        for (Location location: trackItems) {
-            String item = "Latitude: " + location.getLatitude() +
-                            ", Longitude: " + location.getLongitude();
-            items.add(item);
-        }
-        childItems.put(parentItems.get(size), items);*/
 
         int i = parentItems.size();
         for (Track track: TrackList.getTrackList()) {

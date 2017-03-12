@@ -1,7 +1,6 @@
 package com.course_work.margo.gps_tracker;
 
 import android.content.Intent;
-import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -13,11 +12,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private int trackNumber;
     private Track currentTrack;
 
     @Override
@@ -26,7 +27,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         Intent intent = getIntent();
-        trackNumber = intent.getIntExtra("trackNumber", TrackList.size());
+        int trackNumber = intent.getIntExtra("trackNumber", TrackList.size());
         currentTrack = TrackList.getTrack(trackNumber);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -49,16 +50,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        // get track items as LatLng points
+        List<LatLng> items = currentTrack.getItemsAsLatLng();
 
-        LatLng marker = new LatLng(-34, 151);
-        for (Location location: currentTrack.getItems()) {
-            marker = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(marker));
+        // draw line between track's points
+        PolylineOptions trackOptions = new PolylineOptions()
+                .addAll(items);
+        mMap.addPolyline(trackOptions);
+
+        // add marker in each point pf track
+        for (LatLng latLng: items) {
+            mMap.addMarker(new MarkerOptions().position(latLng));
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(marker));
+
+        // move camera to beginning of the track
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(items.get(0)));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
     }
 }

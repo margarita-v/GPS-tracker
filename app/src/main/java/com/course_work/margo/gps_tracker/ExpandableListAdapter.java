@@ -14,16 +14,16 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter {
+class ExpandableListAdapter extends BaseExpandableListAdapter {
 
-    Context context;
-    List<String> trackHeaders;
-    HashMap<String, List<String>> trackItems;
-    ImageButton imgBtnMap, imgBtnDelete;
+    private Context context;
+    private List<String> trackHeaders;
+    private HashMap<String, List<String>> trackItems;
+    private ImageButton imgBtnMap, imgBtnDelete;
 
-    public ExpandableListAdapter(Context context,
-                                 List<String> headers,
-                                 HashMap<String, List<String>> items) {
+    ExpandableListAdapter(Context context,
+                          List<String> headers,
+                          HashMap<String, List<String>> items) {
         this.context = context;
         this.trackHeaders = headers;
         this.trackItems = items;
