@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnViewTracks:
-                if (!TrackList.contains(currentTrack))
+                if (currentTrack != null && !TrackList.contains(currentTrack))
                     TrackList.addTrack(currentTrack);
                 Intent intent = new Intent(this, TracksActivity.class);
                 startActivity(intent);
@@ -87,7 +87,14 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.btnStart:
                 checkLocationSettings();
                 break;
+            case R.id.btnPause:
+                TrackList.setIsTrackingPaused(true);
+                TrackList.setIsTrackingStopped(false);
+                stopLocationUpdates();
+                break;
             case R.id.btnStop:
+                TrackList.setIsTrackingPaused(false);
+                TrackList.setIsTrackingStopped(true);
                 stopLocationUpdates();
                 break;
             default:
@@ -106,21 +113,21 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        if (mGoogleApiClient.isConnected())
+        if (mGoogleApiClient.isConnected() && TrackList.isTrackingPaused())
             stopLocationUpdates();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mGoogleApiClient.isConnected())
+        if (mGoogleApiClient.isConnected() && !TrackList.isTrackingPaused() && !TrackList.isTrackingStopped())
             startLocationUpdates();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient.isConnected())
+        if (mGoogleApiClient.isConnected() && TrackList.isTrackingStopped())
             mGoogleApiClient.disconnect();
     }
     //endregion
@@ -161,11 +168,7 @@ public class MainActivity extends AppCompatActivity implements
         final Status status = locationSettingsResult.getStatus();
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
-                // Use current date and time as a track's name
-                DateFormat dateFormat = DateFormat.getDateTimeInstance();
-                Calendar calendar = Calendar.getInstance();
-                currentTrack = new Track(dateFormat.format(calendar.getTime()));
-                startLocationUpdates();
+                startTracking();
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                 try {
@@ -188,7 +191,8 @@ public class MainActivity extends AppCompatActivity implements
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-                        startLocationUpdates();
+                        //startLocationUpdates();
+                        startTracking();
                         break;
                     case Activity.RESULT_CANCELED:
                         break;
@@ -236,6 +240,23 @@ public class MainActivity extends AppCompatActivity implements
 
             }
         });
+    }
+
+    private void startTracking() {
+        // Use current date and time as a track's name
+        DateFormat dateFormat = DateFormat.getDateTimeInstance();
+        Calendar calendar = Calendar.getInstance();
+        TrackList.setIsTrackingStopped(false);
+        // if track wasn't paused, then we create new track, else track wil be resumed
+        if (!TrackList.isTrackingPaused()) {
+            // begin new track and save old track to list
+            if (currentTrack != null && !TrackList.contains(currentTrack))
+                TrackList.addTrack(currentTrack);
+            currentTrack = new Track(dateFormat.format(calendar.getTime()));
+        }
+        else
+            TrackList.setIsTrackingPaused(false);
+        startLocationUpdates();
     }
 
     private void updateLocationUI() {

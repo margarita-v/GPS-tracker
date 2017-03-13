@@ -7,6 +7,30 @@ import java.util.List;
 public class TrackList {
     private static List<Track> trackList = new ArrayList<>();
 
+    //region Flags
+    // flag which be equal True if tracking was paused
+    private static boolean isTrackingPaused = false;
+
+    public static boolean isTrackingPaused() {
+        return isTrackingPaused;
+    }
+
+    public static void setIsTrackingPaused(boolean isTrackingPaused) {
+        TrackList.isTrackingPaused = isTrackingPaused;
+    }
+
+    // flag which be equal True if tracking was stopped
+    private static boolean isTrackingStopped = true;
+
+    public static boolean isTrackingStopped() {
+        return isTrackingStopped;
+    }
+
+    public static void setIsTrackingStopped(boolean isTrackingStopped) {
+        TrackList.isTrackingStopped = isTrackingStopped;
+    }
+    //endregion
+
     // return a count of track's items
     public static int size() {
         return trackList.size();
