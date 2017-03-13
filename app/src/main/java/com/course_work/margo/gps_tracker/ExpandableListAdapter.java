@@ -11,6 +11,8 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.course_work.margo.gps_tracker.location.TrackList;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -102,6 +104,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                     public void onClick(DialogInterface dialog, int id) {
                         // User clicked OK button
                         trackHeaders.remove(headerTitle);
+                        TrackList.removeTrack(groupPosition);
                         notifyDataSetChanged();
                     }
                 });

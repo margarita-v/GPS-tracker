@@ -79,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnViewTracks:
-                TrackList.addTrack(currentTrack);
+                if (!TrackList.contains(currentTrack))
+                    TrackList.addTrack(currentTrack);
                 Intent intent = new Intent(this, TracksActivity.class);
                 startActivity(intent);
                 break;

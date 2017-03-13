@@ -26,4 +26,14 @@ public class TrackList {
     public static void addTrack(Track track) {
         trackList.add(track);
     }
+
+    // remove track by index
+    public static void removeTrack(int index) {
+        trackList.remove(index);
+    }
+
+    // check does track list contain track
+    public static boolean contains(Track track) {
+        return trackList.contains(track);
+    }
 }

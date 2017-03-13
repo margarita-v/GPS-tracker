@@ -26,16 +26,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        Intent intent = getIntent();
-        int trackNumber = intent.getIntExtra("trackNumber", TrackList.size());
-        currentTrack = TrackList.getTrack(trackNumber);
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = getIntent();
+        int trackNumber = intent.getIntExtra("trackNumber", TrackList.size());
+        currentTrack = TrackList.getTrack(trackNumber);
+    }
 
     /**
      * Manipulates the map once available.
@@ -65,6 +68,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // move camera to beginning of the track
         mMap.moveCamera(CameraUpdateFactory.newLatLng(items.get(0)));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
     }
 }
