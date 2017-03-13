@@ -1,10 +1,12 @@
 package com.course_work.margo.gps_tracker;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -49,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements
     private static final long UPDATE_INTERVAL = 1000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
+    // blocking the transition to sleep
+    private PowerManager.WakeLock wakeLock;
+
     TextView tvLocation;
     Track currentTrack;
 
@@ -70,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements
 
         btnViewTracks = (Button) findViewById(R.id.btnViewTracks);
         btnViewTracks.setOnClickListener(this);
+
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "No sleep");
+        wakeLock.acquire();
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
         buildGoogleApiClient();
@@ -140,6 +149,12 @@ public class MainActivity extends AppCompatActivity implements
         super.onStop();
         if (mGoogleApiClient.isConnected() && TrackList.isTrackingStopped())
             mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        wakeLock.release();
     }
     //endregion
 
