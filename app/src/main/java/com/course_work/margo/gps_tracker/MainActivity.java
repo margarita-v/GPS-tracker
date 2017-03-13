@@ -62,9 +62,11 @@ public class MainActivity extends AppCompatActivity implements
 
         btnPause = (Button) findViewById(R.id.btnPause);
         btnPause.setOnClickListener(this);
+        btnPause.setEnabled(false);
 
         btnStop = (Button) findViewById(R.id.btnStop);
         btnStop.setOnClickListener(this);
+        btnStop.setEnabled(false);
 
         btnViewTracks = (Button) findViewById(R.id.btnViewTracks);
         btnViewTracks.setOnClickListener(this);
@@ -85,14 +87,23 @@ public class MainActivity extends AppCompatActivity implements
                 startActivity(intent);
                 break;
             case R.id.btnStart:
+                btnStart.setEnabled(false);
+                btnPause.setEnabled(true);
+                btnStop.setEnabled(true);
                 checkLocationSettings();
                 break;
             case R.id.btnPause:
+                btnStart.setEnabled(true);
+                btnPause.setEnabled(false);
+                btnStop.setEnabled(true);
                 TrackList.setIsTrackingPaused(true);
                 TrackList.setIsTrackingStopped(false);
                 stopLocationUpdates();
                 break;
             case R.id.btnStop:
+                btnStart.setEnabled(true);
+                btnPause.setEnabled(false);
+                btnStop.setEnabled(false);
                 TrackList.setIsTrackingPaused(false);
                 TrackList.setIsTrackingStopped(true);
                 stopLocationUpdates();
