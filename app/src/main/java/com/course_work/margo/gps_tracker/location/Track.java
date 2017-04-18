@@ -43,6 +43,10 @@ public class Track {
         return name;
     }
 
+    public int size() {
+        return items.size();
+    }
+
     public void addLocation(Location location) {
         items.add(location);
     }

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.location.TrackList;
 
@@ -87,9 +88,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         imgBtnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, MapsActivity.class);
-                intent.putExtra("trackNumber", groupPosition);
-                context.startActivity(intent);
+                if (TrackList.getTrack(groupPosition).size() > 0) {
+                    Intent intent = new Intent(context, MapsActivity.class);
+                    intent.putExtra("trackNumber", groupPosition);
+                    context.startActivity(intent);
+                }
+                else
+                    Toast.makeText(context, "This track is empty", Toast.LENGTH_SHORT).show();
             }
         });
         // Delete chosen track
