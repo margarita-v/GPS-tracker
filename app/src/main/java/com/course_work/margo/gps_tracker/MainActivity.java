@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -48,8 +49,10 @@ public class MainActivity extends AppCompatActivity implements
     protected LocationSettingsRequest mLocationSettingsRequest;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    private static final long UPDATE_INTERVAL = 1000;
+    private static final long UPDATE_INTERVAL = 2000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
+
+    private static final String TAG = "myLog";
 
     // blocking the transition to sleep
     private PowerManager.WakeLock wakeLock;
@@ -81,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements
         wakeLock.acquire();
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
+        Log.d(TAG, "Create");
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -126,8 +130,17 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "Start");
         if (mGoogleApiClient != null)
             mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "Resume");
+        if (mGoogleApiClient.isConnected() && !TrackList.isTrackingPaused() && !TrackList.isTrackingStopped())
+            startLocationUpdates();
     }
 
     @Override
@@ -135,13 +148,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onPause();
         if (mGoogleApiClient.isConnected() && TrackList.isTrackingPaused())
             stopLocationUpdates();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mGoogleApiClient.isConnected() && !TrackList.isTrackingPaused() && !TrackList.isTrackingStopped())
-            startLocationUpdates();
     }
 
     @Override
@@ -227,6 +233,26 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    private void startTracking() {
+        // Use current date and time as a track's name
+        DateFormat dateFormat = DateFormat.getDateTimeInstance();
+        Calendar calendar = Calendar.getInstance();
+        TrackList.setIsTrackingStopped(false);
+        // if track wasn't paused, then we create new track, else track wil be resumed
+        if (!TrackList.isTrackingPaused()) {
+            // begin new track and save old track to list
+            if (currentTrack != null && !TrackList.contains(currentTrack))
+                TrackList.addTrack(currentTrack);
+            currentTrack = new Track(dateFormat.format(calendar.getTime()));
+            if (mCurrentLocation != null)
+                currentTrack.addLocation(mCurrentLocation);
+        }
+        else
+            TrackList.setIsTrackingPaused(false);
+        Log.d(TAG, "Track");
+        startLocationUpdates();
+    }
+
     protected void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -248,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(@NonNull Status status) {
-
+                Log.d(TAG, "Tracking goes");
             }
         });
     }
@@ -268,31 +294,6 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
-    private void startTracking() {
-        // Use current date and time as a track's name
-        DateFormat dateFormat = DateFormat.getDateTimeInstance();
-        Calendar calendar = Calendar.getInstance();
-        TrackList.setIsTrackingStopped(false);
-        // if track wasn't paused, then we create new track, else track wil be resumed
-        if (!TrackList.isTrackingPaused()) {
-            // begin new track and save old track to list
-            if (currentTrack != null && !TrackList.contains(currentTrack))
-                TrackList.addTrack(currentTrack);
-            currentTrack = new Track(dateFormat.format(calendar.getTime()));
-        }
-        else
-            TrackList.setIsTrackingPaused(false);
-        startLocationUpdates();
-    }
-
-    private void updateLocationUI() {
-        if (mCurrentLocation != null) {
-            String item = "Latitude: " + mCurrentLocation.getLatitude() +
-                    " , Longitude: " + mCurrentLocation.getLongitude();
-            tvLocation.setText(item);
-        }
-    }
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (mCurrentLocation == null) {
@@ -309,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
+            Log.d(TAG, "Connected");
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             updateLocationUI();
         }
@@ -330,5 +332,13 @@ public class MainActivity extends AppCompatActivity implements
         currentTrack.addLocation(mCurrentLocation);
         updateLocationUI();
         Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateLocationUI() {
+        if (mCurrentLocation != null) {
+            String item = "Latitude: " + mCurrentLocation.getLatitude() +
+                    " , Longitude: " + mCurrentLocation.getLongitude();
+            tvLocation.setText(item);
+        }
     }
 }

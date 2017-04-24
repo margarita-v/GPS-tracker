@@ -67,7 +67,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // move camera to beginning of the track
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(items.get(0)));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(items.get(0), 17));
     }
 }
