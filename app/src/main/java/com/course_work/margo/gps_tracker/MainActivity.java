@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.location.Track;
 import com.course_work.margo.gps_tracker.location.TrackList;
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements
     protected LocationSettingsRequest mLocationSettingsRequest;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    private static final long UPDATE_INTERVAL = 2000;
+    private static final long UPDATE_INTERVAL = 4000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
     private static final String TAG = "myLog";

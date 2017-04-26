@@ -58,7 +58,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // draw line between track's points
         PolylineOptions trackOptions = new PolylineOptions()
-                .addAll(items);
+                .addAll(items)
+                .width(7);
         mMap.addPolyline(trackOptions);
 
         // add marker in each point pf track
