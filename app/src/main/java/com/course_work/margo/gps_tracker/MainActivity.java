@@ -100,9 +100,6 @@ public class MainActivity extends AppCompatActivity implements
                 startActivity(intent);
                 break;
             case R.id.btnStart:
-                btnStart.setEnabled(false);
-                btnPause.setEnabled(true);
-                btnStop.setEnabled(true);
                 checkLocationSettings();
                 break;
             case R.id.btnPause:
@@ -234,6 +231,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void startTracking() {
+        btnStart.setEnabled(false);
+        btnPause.setEnabled(true);
+        btnStop.setEnabled(true);
         // Use current date and time as a track's name
         DateFormat dateFormat = DateFormat.getDateTimeInstance();
         Calendar calendar = Calendar.getInstance();
@@ -244,8 +244,6 @@ public class MainActivity extends AppCompatActivity implements
             if (currentTrack != null && !TrackList.contains(currentTrack))
                 TrackList.addTrack(currentTrack);
             currentTrack = new Track(dateFormat.format(calendar.getTime()));
-            if (mCurrentLocation != null)
-                currentTrack.addLocation(mCurrentLocation);
         }
         else
             TrackList.setIsTrackingPaused(false);
@@ -331,7 +329,6 @@ public class MainActivity extends AppCompatActivity implements
         mCurrentLocation = location;
         currentTrack.addLocation(mCurrentLocation);
         updateLocationUI();
-        Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
     }
 
     private void updateLocationUI() {
