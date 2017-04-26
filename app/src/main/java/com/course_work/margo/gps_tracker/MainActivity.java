@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.location.Track;
 import com.course_work.margo.gps_tracker.location.TrackList;
@@ -93,10 +94,12 @@ public class MainActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnViewTracks:
-                if (currentTrack != null && !TrackList.contains(currentTrack))
-                    TrackList.addTrack(currentTrack);
-                Intent intent = new Intent(this, TracksActivity.class);
-                startActivity(intent);
+                if (currentTrack == null && TrackList.size() == 0)
+                    Toast.makeText(this, "Track list is empty", Toast.LENGTH_SHORT).show();
+                else {
+                    Intent intent = new Intent(this, TracksActivity.class);
+                    startActivity(intent);
+                }
                 break;
             case R.id.btnStart:
                 checkLocationSettings();
@@ -115,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements
                 btnStop.setEnabled(false);
                 TrackList.setIsTrackingPaused(false);
                 TrackList.setIsTrackingStopped(true);
+                currentTrack = null;
                 stopLocationUpdates();
                 break;
             default:
@@ -243,10 +247,11 @@ public class MainActivity extends AppCompatActivity implements
             if (currentTrack != null && !TrackList.contains(currentTrack))
                 TrackList.addTrack(currentTrack);
             currentTrack = new Track(dateFormat.format(calendar.getTime()));
+            TrackList.addTrack(currentTrack);
         }
         else
             TrackList.setIsTrackingPaused(false);
-        Log.d(TAG, "Track");
+        Toast.makeText(this, "Start tracking", Toast.LENGTH_SHORT).show();
         startLocationUpdates();
     }
 

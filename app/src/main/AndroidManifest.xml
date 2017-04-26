@@ -28,6 +28,7 @@
         </activity>
         <activity
             android:name=".TracksActivity"
+            android:label="@string/title_activity_tracks"
             android:parentActivityName=".MainActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

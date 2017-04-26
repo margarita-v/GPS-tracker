@@ -110,7 +110,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                         // User clicked OK button
                         trackHeaders.remove(headerTitle);
                         TrackList.removeTrack(groupPosition);
-                        notifyDataSetChanged();
+                        if (TrackList.size() == 0) {
+                            Toast.makeText(context, "Track list is empty", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(context, MainActivity.class);
+                            context.startActivity(intent);
+                        }
+                        else
+                            notifyDataSetChanged();
                     }
                 });
 
