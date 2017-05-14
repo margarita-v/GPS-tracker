@@ -111,7 +111,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                         trackHeaders.remove(headerTitle);
                         TrackList.removeTrack(groupPosition);
                         if (TrackList.size() == 0) {
-                            Toast.makeText(context, "Track list is empty", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Route list is empty", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(context, MainActivity.class);
                             context.startActivity(intent);
                         }

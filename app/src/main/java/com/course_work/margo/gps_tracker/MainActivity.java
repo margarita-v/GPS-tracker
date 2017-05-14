@@ -1,11 +1,13 @@
 package com.course_work.margo.gps_tracker;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -84,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements
         wakeLock.acquire();
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
+        TrackList.init();
+        currentTrack = null;
+        mCurrentLocation = null;
         Log.d(TAG, "Create");
         buildGoogleApiClient();
         createLocationRequest();
@@ -251,8 +256,13 @@ public class MainActivity extends AppCompatActivity implements
         }
         else
             TrackList.setIsTrackingPaused(false);
-        Toast.makeText(this, "Start tracking", Toast.LENGTH_SHORT).show();
         startLocationUpdates();
+        if (mCurrentLocation == null) {
+            WaitingProgressDialog dialog = new WaitingProgressDialog();
+            dialog.execute();
+        }
+        else
+            Toast.makeText(this, "Start tracking", Toast.LENGTH_SHORT).show();
     }
 
     protected void startLocationUpdates() {
@@ -313,23 +323,22 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             }
             Log.d(TAG, "Connected");
-            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            updateLocationUI();
+            //mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            //updateLocationUI();
         }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        Toast.makeText(this, "Changed", Toast.LENGTH_SHORT).show();
         mCurrentLocation = location;
         currentTrack.addLocation(mCurrentLocation);
         updateLocationUI();
@@ -340,6 +349,52 @@ public class MainActivity extends AppCompatActivity implements
             String item = "Latitude: " + mCurrentLocation.getLatitude() +
                     " , Longitude: " + mCurrentLocation.getLongitude();
             tvLocation.setText(item);
+        }
+    }
+
+    // Progress dialog for waiting for GPS signal
+    private class WaitingProgressDialog extends AsyncTask<Void, Integer, Void> {
+        ProgressDialog dialog;
+        final String message = "Waiting for GPS signal...\n";
+        final int max = 60;
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setTitle("Start tracking");
+            dialog.setMessage(message);
+            dialog.setIndeterminate(false);
+            dialog.setCancelable(false);
+            dialog.setProgress(0);
+            dialog.setMax(max);
+            dialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            for(int i = 1; i <= max && mCurrentLocation == null; i++){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                publishProgress(i);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... params) {
+            int progress = params[0];
+            dialog.setProgress(progress);
+            dialog.setMessage(message + Integer.toString(progress) + " seconds");
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            dialog.dismiss();
+            super.onPostExecute(result);
         }
     }
 }
