@@ -12,6 +12,7 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.Manifest;
 
 import com.course_work.margo.gps_tracker.location.Track;
 import com.course_work.margo.gps_tracker.location.TrackList;
@@ -41,7 +43,8 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener, ConnectionCallbacks,
-        OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult> {
+        OnConnectionFailedListener, LocationListener,// ResultCallback<LocationSettingsResult>,
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
     Button btnStart, btnPause, btnStop, btnViewTracks;
 
@@ -191,15 +194,36 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     protected void checkLocationSettings() {
-        PendingResult<LocationSettingsResult> result =
+        /*PendingResult<LocationSettingsResult> result =
                 LocationServices.SettingsApi.checkLocationSettings(
                         mGoogleApiClient,
                         mLocationSettingsRequest
                 );
         // results provided through a PendingResult
-        result.setResultCallback(this);
+        result.setResultCallback(this);*/
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+
+            ActivityCompat.requestPermissions(this,
+                    new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+                    REQUEST_CHECK_SETTINGS);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startTracking();
+                }
+            }
+        }
+    }
+
+    /*
     @Override
     public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
         final Status status = locationSettingsResult.getStatus();
@@ -236,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
         }
-    }
+    }*/
 
     private void startTracking() {
         btnStart.setEnabled(false);
@@ -267,9 +291,9 @@ public class MainActivity extends AppCompatActivity implements
 
     protected void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -310,9 +334,9 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnected(@Nullable Bundle bundle) {
         if (mCurrentLocation == null) {
             if (ActivityCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
