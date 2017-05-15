@@ -109,7 +109,8 @@ public class MainActivity extends AppCompatActivity implements
         switch (v.getId()) {
             case R.id.btnViewTracks:
                 if (currentTrack == null && TrackList.size() == 0)
-                    Toast.makeText(this, "Track list is empty", Toast.LENGTH_SHORT).show();
+                    createAlertDialog(this, "Track list is empty",
+                            "To create a new track, push START button.");
                 else {
                     Intent intent = new Intent(this, TracksActivity.class);
                     startActivity(intent);
@@ -374,6 +375,21 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    public static void createAlertDialog(Context context, String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title)
+                .setMessage(message);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
     // Progress dialog for waiting for GPS signal
     private class WaitingProgressDialog extends AsyncTask<Void, Integer, Void> {
         ProgressDialog dialog;
@@ -422,17 +438,9 @@ public class MainActivity extends AppCompatActivity implements
         protected void onPostExecute(Void result) {
             dialog.dismiss();
             // Offer user to turn on the Internet
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setTitle("Waiting for a GPS signal")
-                    .setMessage("Too long waiting for connecting to GPS. Please, turn on WiFi or Internet for receive location updates.");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-                }
-            });
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            createAlertDialog(MainActivity.this,
+                    "Waiting for a GPS signal",
+                    "Too long waiting for connecting to GPS. Please, turn on WiFi or Internet for receive location updates.");
         }
     }
 }

@@ -94,7 +94,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                     context.startActivity(intent);
                 }
                 else
-                    Toast.makeText(context, "This track is empty", Toast.LENGTH_SHORT).show();
+                    MainActivity.createAlertDialog(context, "This track is empty",
+                            "Start tracking this route and enable receiving location updates in settings.");
             }
         });
         // Delete chosen track
