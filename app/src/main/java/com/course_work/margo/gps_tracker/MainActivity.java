@@ -1,6 +1,7 @@
 package com.course_work.margo.gps_tracker;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -132,10 +133,6 @@ public class MainActivity extends AppCompatActivity implements
                 TrackList.setIsTrackingPaused(false);
                 TrackList.setIsTrackingStopped(true);
                 currentTrack = null;
-                if (dialogAsyncTask != null && !dialogAsyncTask.isCancelled()) {
-                    dialogAsyncTask.cancel(true);
-                    tvLocation.setText("");
-                }
                 stopLocationUpdates();
                 break;
             default:
@@ -292,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements
         else
             TrackList.setIsTrackingPaused(false);
         startLocationUpdates();
+        // Print progress dialog while location hasn't received
         if (mCurrentLocation == null) {
             tvLocation.setText(message);
             dialogAsyncTask = new WaitingProgressDialog();
@@ -330,7 +328,10 @@ public class MainActivity extends AppCompatActivity implements
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(@NonNull Status status) {
-
+                if (dialogAsyncTask != null && !dialogAsyncTask.isCancelled()) {
+                    dialogAsyncTask.cancel(true);
+                    tvLocation.setText("");
+                }
             }
         });
     }
@@ -393,7 +394,6 @@ public class MainActivity extends AppCompatActivity implements
                 }
             });
             dialog.show();
-            super.onPreExecute();
         }
 
         @Override
@@ -421,7 +421,18 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Void result) {
             dialog.dismiss();
-            super.onPostExecute(result);
+            // Offer user to turn on the Internet
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Waiting for a GPS signal")
+                    .setMessage("Too long waiting for connecting to GPS. Please, turn on WiFi or Internet for receive location updates.");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 }
