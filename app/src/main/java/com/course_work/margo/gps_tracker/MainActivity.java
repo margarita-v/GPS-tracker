@@ -223,8 +223,6 @@ public class MainActivity extends AppCompatActivity implements
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startTracking();
                 }
-                else
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -337,8 +335,8 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             }
             Log.d(TAG, "Connected");
-            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            updateLocationUI();
+            //mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            //updateLocationUI();
         }
     }
 
@@ -352,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(this, "Changed", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Changed", Toast.LENGTH_SHORT).show();
         mCurrentLocation = location;
         currentTrack.addLocation(mCurrentLocation);
         updateLocationUI();
