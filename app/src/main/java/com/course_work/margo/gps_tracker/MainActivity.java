@@ -3,6 +3,7 @@ package com.course_work.margo.gps_tracker;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -58,10 +59,14 @@ public class MainActivity extends AppCompatActivity implements
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
     private static final String TAG = "myLog";
+    private final String message = "Waiting for a GPS signal...\n";
 
     // blocking the transition to sleep
     private PowerManager.WakeLock wakeLock;
 
+    WaitingProgressDialog dialogAsyncTask;
+    int currentProgress;
+    final int max = 30;
     TextView tvLocation;
     Track currentTrack;
 
@@ -127,6 +132,10 @@ public class MainActivity extends AppCompatActivity implements
                 TrackList.setIsTrackingPaused(false);
                 TrackList.setIsTrackingStopped(true);
                 currentTrack = null;
+                if (dialogAsyncTask != null && !dialogAsyncTask.isCancelled()) {
+                    dialogAsyncTask.cancel(true);
+                    tvLocation.setText("");
+                }
                 stopLocationUpdates();
                 break;
             default:
@@ -284,8 +293,9 @@ public class MainActivity extends AppCompatActivity implements
             TrackList.setIsTrackingPaused(false);
         startLocationUpdates();
         if (mCurrentLocation == null) {
-            WaitingProgressDialog dialog = new WaitingProgressDialog();
-            dialog.execute();
+            tvLocation.setText(message);
+            dialogAsyncTask = new WaitingProgressDialog();
+            dialogAsyncTask.execute();
         }
         else
             Toast.makeText(this, "Start tracking", Toast.LENGTH_SHORT).show();
@@ -350,7 +360,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
-        //Toast.makeText(this, "Changed", Toast.LENGTH_SHORT).show();
         mCurrentLocation = location;
         currentTrack.addLocation(mCurrentLocation);
         updateLocationUI();
@@ -367,8 +376,6 @@ public class MainActivity extends AppCompatActivity implements
     // Progress dialog for waiting for GPS signal
     private class WaitingProgressDialog extends AsyncTask<Void, Integer, Void> {
         ProgressDialog dialog;
-        final String message = "Waiting for GPS signal...\n";
-        final int max = 60;
 
         @Override
         protected void onPreExecute() {
@@ -379,19 +386,27 @@ public class MainActivity extends AppCompatActivity implements
             dialog.setCancelable(false);
             dialog.setProgress(0);
             dialog.setMax(max);
+            dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Close", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
             dialog.show();
             super.onPreExecute();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            for(int i = 1; i <= max && mCurrentLocation == null; i++){
+            currentProgress = 1;
+            while (currentProgress <= max && mCurrentLocation == null && !isCancelled()) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                publishProgress(i);
+                publishProgress(currentProgress);
+                currentProgress++;
             }
             return null;
         }

@@ -6,4 +6,8 @@
     <string name="delete_confirm_message">Are you sure to delete this track?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="view_tracks">View Tracks</string>
+    <string name="stop">Stop</string>
+    <string name="pause">Pause</string>
+    <string name="start">Start</string>
 </resources>
