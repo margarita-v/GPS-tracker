@@ -1,8 +1,8 @@
 package com.course_work.margo.gps_tracker;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.course_work.margo.gps_tracker.location.Track;
 import com.course_work.margo.gps_tracker.location.TrackList;
@@ -16,7 +16,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private Track currentTrack;
@@ -38,6 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = getIntent();
         int trackNumber = intent.getIntExtra("trackNumber", TrackList.size());
         currentTrack = TrackList.getTrack(trackNumber);
+        setTitle(currentTrack.getName());
     }
 
     /**
