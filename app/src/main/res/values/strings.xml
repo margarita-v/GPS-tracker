@@ -2,10 +2,30 @@
     <string name="app_name">GPS-tracker</string>
     <string name="title_activity_tracks">Route list</string>
     <string name="title_activity_maps">Map</string>
+
+    <!-- Delete confirmation -->
     <string name="delete_confirm_title">Confirmation</string>
     <string name="delete_confirm_message">Are you sure to delete this track?</string>
-    <string name="delete">Delete</string>
-    <string name="cancel">Cancel</string>
+
+    <!-- Message about waiting for a GPS -->
+    <string name="alert_waiting_title">Waiting for a GPS signal</string>
+    <string name="alert_waiting_message">Too long waiting for connecting to GPS.
+        Please, turn on WiFi or Internet for receive location updates.</string>
+
+    <!-- Message about empty track list -->
+    <string name="alert_empty_list_title">Track list is empty</string>
+    <string name="alert_empty_list_message">To create a new track, push START button.</string>
+
+    <!-- Message about empty chosen track list -->
+    <string name="alert_empty_track_title">This track is empty</string>
+    <string name="alert_empty_track_message">Start tracking this route and enable receiving location updates in settings.</string>
+
+    <!-- Helpful titles -->
+    <string name="start_tracking_title">Start tracking</string>
+    <string name="ok">OK</string>
+    <string name="close">Close</string>
+
+    <!-- Buttons -->
     <string name="view_tracks">View Tracks</string>
     <string name="stop">Stop</string>
     <string name="pause">Pause</string>

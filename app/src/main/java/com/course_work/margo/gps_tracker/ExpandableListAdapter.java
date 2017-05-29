@@ -22,7 +22,6 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Context context;
     private List<String> trackHeaders;
     private HashMap<String, List<String>> trackItems;
-    private ImageButton imgBtnMap, imgBtnDelete;
 
     ExpandableListAdapter(Context context,
                           List<String> headers,
@@ -81,8 +80,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView lblListHeader = (TextView) convertView.findViewById(R.id.trackName);
         lblListHeader.setText(headerTitle);
 
-        imgBtnMap = (ImageButton) convertView.findViewById(R.id.imgBtnMap);
-        imgBtnDelete = (ImageButton) convertView.findViewById(R.id.imgBtnDelete);
+        ImageButton imgBtnMap = (ImageButton) convertView.findViewById(R.id.imgBtnMap);
+        ImageButton imgBtnDelete = (ImageButton) convertView.findViewById(R.id.imgBtnDelete);
 
         // View track on map
         imgBtnMap.setOnClickListener(new View.OnClickListener() {
@@ -94,8 +93,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                     context.startActivity(intent);
                 }
                 else
-                    MainActivity.createAlertDialog(context, "This track is empty",
-                            "Start tracking this route and enable receiving location updates in settings.");
+                    MainActivity.createAlertDialog(context,
+                            R.string.alert_empty_track_title, R.string.alert_empty_track_message);
             }
         });
         // Delete chosen track
@@ -112,7 +111,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                         trackHeaders.remove(headerTitle);
                         TrackList.removeTrack(groupPosition);
                         if (TrackList.size() == 0) {
-                            Toast.makeText(context, "Route list is empty", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, R.string.alert_empty_list_title, Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(context, MainActivity.class);
                             context.startActivity(intent);
                         }
@@ -122,9 +121,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                 });
 
                 builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
+                    public void onClick(DialogInterface dialog, int id) { }
                 });
 
                 AlertDialog dialog = builder.create();

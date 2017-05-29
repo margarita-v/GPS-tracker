@@ -136,8 +136,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             @Override
             public void onClick(View v) {
                 if (currentTrack == null && TrackList.size() == 0)
-                    createAlertDialog(MainActivity.this, "Track list is empty",
-                            "To create a new track, push START button.");
+                    createAlertDialog(MainActivity.this,
+                            R.string.alert_empty_list_title, R.string.alert_empty_list_message);
                 else {
                     Intent intent = new Intent(MainActivity.this, TracksActivity.class);
                     startActivity(intent);
@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             dialogAsyncTask.execute();
         }
         else
-            Toast.makeText(this, "Start tracking", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();
     }
 
     protected void startLocationUpdates() {
@@ -397,15 +397,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         }
     }
 
-    public static void createAlertDialog(Context context, String title, String message) {
+    public static void createAlertDialog(Context context, int titleResource, int messageResource) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(title)
-                .setMessage(message);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setTitle(titleResource)
+                .setMessage(messageResource);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
+            public void onClick(DialogInterface dialog, int which) { }
         });
         AlertDialog dialog = builder.create();
         dialog.setCancelable(false);
@@ -419,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         @Override
         protected void onPreExecute() {
             dialog = new ProgressDialog(MainActivity.this);
-            dialog.setTitle("Start tracking");
+            dialog.setTitle(R.string.start_tracking_title);
             dialog.setMessage(message);
             dialog.setIndeterminate(false);
             dialog.setCancelable(false);
@@ -460,9 +458,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         protected void onPostExecute(Void result) {
             dialog.dismiss();
             // Offer user to turn on the Internet
-            createAlertDialog(MainActivity.this,
-                    "Waiting for a GPS signal",
-                    "Too long waiting for connecting to GPS. Please, turn on WiFi or Internet for receive location updates.");
+            createAlertDialog(MainActivity.this, R.string.alert_waiting_title, R.string.alert_waiting_message);
         }
     }
 }
