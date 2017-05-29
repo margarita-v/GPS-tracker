@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.course_work.margo.gps_tracker.location.Track;
+import com.course_work.margo.gps_tracker.location.TrackEntity;
 import com.course_work.margo.gps_tracker.location.TrackList;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,7 +19,7 @@ import java.util.List;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private Track currentTrack;
+    private TrackEntity currentTrack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ExpandableListView;
 
-import com.course_work.margo.gps_tracker.location.Track;
+import com.course_work.margo.gps_tracker.location.TrackEntity;
 import com.course_work.margo.gps_tracker.location.TrackList;
 
 import java.util.ArrayList;
@@ -29,9 +29,9 @@ public class TracksActivity extends AppCompatActivity {
         childItems = new HashMap<>();
 
         int i = 0;
-        for (Track track: TrackList.getTrackList()) {
-            parentItems.add(track.getName());
-            childItems.put(parentItems.get(i), track.getItemsToString());
+        for (TrackEntity trackEntity : TrackList.getTrackList()) {
+            parentItems.add(trackEntity.getName());
+            childItems.put(parentItems.get(i), trackEntity.getItemsToString());
             i++;
         }
 

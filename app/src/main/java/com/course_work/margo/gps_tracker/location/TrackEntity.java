@@ -7,13 +7,13 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Track {
+public class TrackEntity {
     // name of the track
     private String name;
     // location items of the track
     private List<Location> items;
 
-    public Track(String name) {
+    public TrackEntity(String name) {
         this.name = name;
         this.items = new ArrayList<>();
     }

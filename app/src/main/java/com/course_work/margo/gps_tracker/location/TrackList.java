@@ -5,7 +5,7 @@ import java.util.List;
 
 // this class presents all tracks in application
 public class TrackList {
-    private static List<Track> trackList;
+    private static List<TrackEntity> trackList;
 
     //region Flags
     // flag which be equal True if tracking was paused
@@ -43,18 +43,18 @@ public class TrackList {
     }
 
     // get track list
-    public static List<Track> getTrackList() {
+    public static List<TrackEntity> getTrackList() {
         return trackList;
     }
 
     // get track by index
-    public static Track getTrack(int index) {
+    public static TrackEntity getTrack(int index) {
         return trackList.get(index);
     }
 
-    // add track to list
-    public static void addTrack(Track track) {
-        trackList.add(track);
+    // add trackEntity to list
+    public static void addTrack(TrackEntity trackEntity) {
+        trackList.add(trackEntity);
     }
 
     // remove track by index
@@ -62,8 +62,8 @@ public class TrackList {
         trackList.remove(index);
     }
 
-    // check does track list contain track
-    public static boolean contains(Track track) {
-        return trackList.contains(track);
+    // check does trackEntity list contain trackEntity
+    public static boolean contains(TrackEntity trackEntity) {
+        return trackList.contains(trackEntity);
     }
 }

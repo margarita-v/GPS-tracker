@@ -24,8 +24,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 
-import com.course_work.margo.gps_tracker.location.Track;
+import com.course_work.margo.gps_tracker.location.TrackEntity;
 import com.course_work.margo.gps_tracker.location.TrackList;
+import com.course_work.margo.gps_tracker.models.Track;
+import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -39,12 +41,13 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity implements
-        View.OnClickListener, ConnectionCallbacks,
+public class MainActivity extends AppCompatActivity implements ConnectionCallbacks,
         OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -69,26 +72,78 @@ public class MainActivity extends AppCompatActivity implements
     int currentProgress;
     final int max = 30;
     TextView tvLocation;
-    Track currentTrack;
+    TrackEntity currentTrack;
+
+    private DatabaseHelper databaseHelper = null;
+    private Dao<Track, Integer> trackDao;
+    private Dao<TrackItem, Integer> locationDao;
+
+    private DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Start
         btnStart = (Button) findViewById(R.id.btnStart);
-        btnStart.setOnClickListener(this);
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLocationSettings();
+            }
+        });
 
+        // Pause
         btnPause = (Button) findViewById(R.id.btnPause);
-        btnPause.setOnClickListener(this);
         btnPause.setEnabled(false);
+        btnPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnStart.setEnabled(true);
+                btnPause.setEnabled(false);
+                btnStop.setEnabled(true);
+                TrackList.setIsTrackingPaused(true);
+                TrackList.setIsTrackingStopped(false);
+                stopLocationUpdates();
+            }
+        });
 
+        // Stop
         btnStop = (Button) findViewById(R.id.btnStop);
-        btnStop.setOnClickListener(this);
         btnStop.setEnabled(false);
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnStart.setEnabled(true);
+                btnPause.setEnabled(false);
+                btnStop.setEnabled(false);
+                TrackList.setIsTrackingPaused(false);
+                TrackList.setIsTrackingStopped(true);
+                currentTrack = null;
+                stopLocationUpdates();
+            }
+        });
 
+        // View tracks
         btnViewTracks = (Button) findViewById(R.id.btnViewTracks);
-        btnViewTracks.setOnClickListener(this);
+        btnViewTracks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentTrack == null && TrackList.size() == 0)
+                    createAlertDialog(MainActivity.this, "Track list is empty",
+                            "To create a new track, push START button.");
+                else {
+                    Intent intent = new Intent(MainActivity.this, TracksActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "No sleep");
@@ -102,43 +157,6 @@ public class MainActivity extends AppCompatActivity implements
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btnViewTracks:
-                if (currentTrack == null && TrackList.size() == 0)
-                    createAlertDialog(this, "Track list is empty",
-                            "To create a new track, push START button.");
-                else {
-                    Intent intent = new Intent(this, TracksActivity.class);
-                    startActivity(intent);
-                }
-                break;
-            case R.id.btnStart:
-                checkLocationSettings();
-                break;
-            case R.id.btnPause:
-                btnStart.setEnabled(true);
-                btnPause.setEnabled(false);
-                btnStop.setEnabled(true);
-                TrackList.setIsTrackingPaused(true);
-                TrackList.setIsTrackingStopped(false);
-                stopLocationUpdates();
-                break;
-            case R.id.btnStop:
-                btnStart.setEnabled(true);
-                btnPause.setEnabled(false);
-                btnStop.setEnabled(false);
-                TrackList.setIsTrackingPaused(false);
-                TrackList.setIsTrackingStopped(true);
-                currentTrack = null;
-                stopLocationUpdates();
-                break;
-            default:
-                break;
-        }
     }
 
     //region Activity lifecycle methods
@@ -176,6 +194,10 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         wakeLock.release();
+        if (databaseHelper != null) {
+            OpenHelperManager.releaseHelper();
+            databaseHelper = null;
+        }
     }
     //endregion
 
@@ -284,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements
             // begin new track and save old track to list
             if (currentTrack != null && !TrackList.contains(currentTrack))
                 TrackList.addTrack(currentTrack);
-            currentTrack = new Track(dateFormat.format(calendar.getTime()));
+            currentTrack = new TrackEntity(dateFormat.format(calendar.getTime()));
             TrackList.addTrack(currentTrack);
         }
         else
