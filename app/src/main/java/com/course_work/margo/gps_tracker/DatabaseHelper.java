@@ -13,7 +13,7 @@ import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
 
-public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
+class DatabaseHelper extends OrmLiteSqliteOpenHelper{
     private static final String DATABASE_NAME = "tracks.db";
     private static final int DATABASE_VERSION = 1;
 
@@ -58,5 +58,12 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
             locationDao = getDao(TrackItem.class);
         }
         return locationDao;
+    }
+
+    @Override
+    public void close() {
+        trackDao = null;
+        locationDao = null;
+        super.close();
     }
 }

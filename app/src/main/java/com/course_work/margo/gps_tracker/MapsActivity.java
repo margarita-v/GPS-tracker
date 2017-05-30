@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.course_work.margo.gps_tracker.location.TrackEntity;
 import com.course_work.margo.gps_tracker.location.TrackList;
+import com.course_work.margo.gps_tracker.models.Track;
+import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -13,6 +15,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
 
 import java.util.List;
 
@@ -20,6 +24,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
     private TrackEntity currentTrack;
+
+    //region Using a database helper
+    private DatabaseHelper databaseHelper = null;
+    private Dao<Track, Integer> trackDao;
+    private Dao<TrackItem, Integer> locationDao;
+
+    private DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
+    //endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -5,37 +5,7 @@ import java.util.List;
 
 // this class presents all tracks in application
 public class TrackList {
-    private static List<TrackEntity> trackList;
-
-    //region Flags
-    // flag which be equal True if tracking was paused
-    private static boolean isTrackingPaused;
-
-    public static boolean isTrackingPaused() {
-        return isTrackingPaused;
-    }
-
-    public static void setIsTrackingPaused(boolean isTrackingPaused) {
-        TrackList.isTrackingPaused = isTrackingPaused;
-    }
-
-    // flag which be equal True if tracking was stopped
-    private static boolean isTrackingStopped;
-
-    public static boolean isTrackingStopped() {
-        return isTrackingStopped;
-    }
-
-    public static void setIsTrackingStopped(boolean isTrackingStopped) {
-        TrackList.isTrackingStopped = isTrackingStopped;
-    }
-    //endregion
-
-    public static void init() {
-        trackList = new ArrayList<>();
-        isTrackingPaused = false;
-        isTrackingStopped = true;
-    }
+    private static List<TrackEntity> trackList = new ArrayList<>();
 
     // return a count of track's items
     public static int size() {

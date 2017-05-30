@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    Button btnStart, btnPause, btnStop, btnViewTracks;
+    private Button btnStart, btnPause, btnStop;
 
     private Location mCurrentLocation;
     private GoogleApiClient mGoogleApiClient;
@@ -68,12 +68,15 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     // blocking the transition to sleep
     private PowerManager.WakeLock wakeLock;
 
-    WaitingProgressDialog dialogAsyncTask;
-    int currentProgress;
-    final int max = 30;
-    TextView tvLocation;
-    TrackEntity currentTrack;
+    private WaitingProgressDialog dialogAsyncTask;
+    private final int max = 30;
+    private TextView tvLocation;
+    private TrackEntity currentTrack;
 
+    private boolean isPaused  = false;
+    private boolean isStopped = true;
+
+    //region Using a database helper
     private DatabaseHelper databaseHelper = null;
     private Dao<Track, Integer> trackDao;
     private Dao<TrackItem, Integer> locationDao;
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         }
         return databaseHelper;
     }
+    //endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,11 +109,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         btnPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnStart.setEnabled(true);
-                btnPause.setEnabled(false);
-                btnStop.setEnabled(true);
-                TrackList.setIsTrackingPaused(true);
-                TrackList.setIsTrackingStopped(false);
+                changeState(true, false);
                 stopLocationUpdates();
             }
         });
@@ -120,18 +120,14 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnStart.setEnabled(true);
-                btnPause.setEnabled(false);
-                btnStop.setEnabled(false);
-                TrackList.setIsTrackingPaused(false);
-                TrackList.setIsTrackingStopped(true);
+                changeState(false, true);
                 currentTrack = null;
                 stopLocationUpdates();
             }
         });
 
         // View tracks
-        btnViewTracks = (Button) findViewById(R.id.btnViewTracks);
+        Button btnViewTracks = (Button) findViewById(R.id.btnViewTracks);
         btnViewTracks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         wakeLock.acquire();
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
-        TrackList.init();
         currentTrack = null;
         mCurrentLocation = null;
         Log.d(TAG, "Create");
@@ -172,21 +167,21 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "Resume");
-        if (mGoogleApiClient.isConnected() && !TrackList.isTrackingPaused() && !TrackList.isTrackingStopped())
+        if (mGoogleApiClient.isConnected() && !isPaused && !isStopped)
             startLocationUpdates();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mGoogleApiClient.isConnected() && TrackList.isTrackingPaused())
+        if (mGoogleApiClient.isConnected() && isPaused)
             stopLocationUpdates();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient.isConnected() && TrackList.isTrackingStopped())
+        if (mGoogleApiClient.isConnected() && isStopped)
             mGoogleApiClient.disconnect();
     }
 
@@ -300,9 +295,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         // Use current date and time as a track's name
         DateFormat dateFormat = DateFormat.getDateTimeInstance();
         Calendar calendar = Calendar.getInstance();
-        TrackList.setIsTrackingStopped(false);
+        isStopped = false;
         // if track wasn't paused, then we create new track, else track wil be resumed
-        if (!TrackList.isTrackingPaused()) {
+        if (!isPaused) {
             // begin new track and save old track to list
             if (currentTrack != null && !TrackList.contains(currentTrack))
                 TrackList.addTrack(currentTrack);
@@ -310,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             TrackList.addTrack(currentTrack);
         }
         else
-            TrackList.setIsTrackingPaused(false);
+            isPaused = false;
         startLocationUpdates();
         // Print progress dialog while location hasn't received
         if (mCurrentLocation == null) {
@@ -370,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             }
             Log.d(TAG, "Connected");
             //mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            //updateLocationUI();
+            //printCurrentLocation();
         }
     }
 
@@ -386,10 +381,19 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         currentTrack.addLocation(mCurrentLocation);
-        updateLocationUI();
+        printCurrentLocation();
     }
 
-    private void updateLocationUI() {
+    //region Functions for correct UI state
+    private void changeState(boolean isPaused, boolean isStopped) {
+        this.isPaused  = isPaused;
+        this.isStopped = isStopped;
+        btnStart.setEnabled(isPaused || isStopped);
+        btnPause.setEnabled(!(btnStart.isEnabled()));
+        btnStop.setEnabled(!isStopped);
+    }
+
+    private void printCurrentLocation() {
         if (mCurrentLocation != null) {
             String item = "Latitude: " + mCurrentLocation.getLatitude() +
                     " , Longitude: " + mCurrentLocation.getLongitude();
@@ -409,6 +413,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         dialog.setCancelable(false);
         dialog.show();
     }
+    //endregion
 
     // Progress dialog for waiting for GPS signal
     private class WaitingProgressDialog extends AsyncTask<Void, Integer, Void> {
@@ -434,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         @Override
         protected Void doInBackground(Void... params) {
-            currentProgress = 1;
+            int currentProgress = 1;
             while (currentProgress <= max && mCurrentLocation == null && !isCancelled()) {
                 try {
                     Thread.sleep(1000);

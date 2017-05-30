@@ -23,6 +23,7 @@
     <!-- Helpful titles -->
     <string name="start_tracking_title">Start tracking</string>
     <string name="ok">OK</string>
+    <string name="delete">Delete</string>
     <string name="close">Close</string>
 
     <!-- Buttons -->
