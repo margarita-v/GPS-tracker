@@ -24,8 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 
-import com.course_work.margo.gps_tracker.location.TrackEntity;
-import com.course_work.margo.gps_tracker.location.TrackList;
 import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.google.android.gms.common.ConnectionResult;
@@ -44,6 +42,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Calendar;
 
@@ -71,7 +70,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private WaitingProgressDialog dialogAsyncTask;
     private final int max = 30;
     private TextView tvLocation;
-    private TrackEntity currentTrack;
+    private Track currentTrack;
+    private long countOfTracks;
 
     private boolean isPaused  = false;
     private boolean isStopped = true;
@@ -131,9 +131,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         btnViewTracks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (currentTrack == null && TrackList.size() == 0)
-                    createAlertDialog(MainActivity.this,
-                            R.string.alert_empty_list_title, R.string.alert_empty_list_message);
+                try {
+                    countOfTracks = trackDao.countOf();
+                } catch (SQLException e) {
+                    Log.d(TAG, "Track count exception");
+                }
+                if (currentTrack == null && countOfTracks > 0)
+                    createAlertDialog(MainActivity.this, R.string.alert_empty_list_title, R.string.alert_empty_list_message);
                 else {
                     Intent intent = new Intent(MainActivity.this, TracksActivity.class);
                     startActivity(intent);
@@ -147,8 +151,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
         currentTrack = null;
-        mCurrentLocation = null;
-        Log.d(TAG, "Create");
+        try {
+            trackDao = getHelper().getTrackDao();
+            locationDao = getHelper().getLocationDao();
+        } catch (SQLException e) {
+            Log.d(TAG, "Get dao exception");
+        }
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -244,9 +252,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             case REQUEST_CHECK_SETTINGS: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     startTracking();
-                }
             }
         }
     }
@@ -264,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     // in onActivityResult().
                     status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
                 } catch (IntentSender.SendIntentException e) {
-                    e.printStackTrace();
+                    Log.d(TAG, "Check settings exception");
                 }
                 break;
             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -298,11 +305,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         isStopped = false;
         // if track wasn't paused, then we create new track, else track wil be resumed
         if (!isPaused) {
-            // begin new track and save old track to list
-            if (currentTrack != null && !TrackList.contains(currentTrack))
-                TrackList.addTrack(currentTrack);
-            currentTrack = new TrackEntity(dateFormat.format(calendar.getTime()));
-            TrackList.addTrack(currentTrack);
+            currentTrack = new Track();
+            currentTrack.setName(dateFormat.format(calendar.getTime()));
+            try {
+                trackDao.create(currentTrack);
+            } catch (SQLException e) {
+                Log.d(TAG, "Can't create new track");
+            }
         }
         else
             isPaused = false;
@@ -380,7 +389,11 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        currentTrack.addLocation(mCurrentLocation);
+        try {
+            locationDao.create(new TrackItem(mCurrentLocation, currentTrack));
+        } catch (SQLException e) {
+            Log.d(TAG, "Can't create locationDao");
+        }
         printCurrentLocation();
     }
 

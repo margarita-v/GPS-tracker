@@ -43,4 +43,9 @@ public class TrackItem {
         this.time       = location.getTime();
         this.track      = track;
     }
+
+    @Override
+    public String toString() {
+        return "Latitude: " + this.latitude + ", longitude: " + this.longitude;
+    }
 }

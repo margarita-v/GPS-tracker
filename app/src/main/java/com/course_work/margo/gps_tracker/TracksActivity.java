@@ -4,13 +4,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ExpandableListView;
 
-import com.course_work.margo.gps_tracker.location.TrackEntity;
-import com.course_work.margo.gps_tracker.location.TrackList;
 import com.course_work.margo.gps_tracker.models.Track;
-import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +22,6 @@ public class TracksActivity extends AppCompatActivity {
 
     //region Using a database helper
     private DatabaseHelper databaseHelper = null;
-    private Dao<Track, Integer> trackDao;
-    private Dao<TrackItem, Integer> locationDao;
 
     private DatabaseHelper getHelper() {
         if (databaseHelper == null) {
@@ -45,11 +41,16 @@ public class TracksActivity extends AppCompatActivity {
         parentItems = new ArrayList<>();
         childItems = new HashMap<>();
 
-        int i = 0;
-        for (TrackEntity trackEntity : TrackList.getTrackList()) {
-            parentItems.add(trackEntity.getName());
-            childItems.put(parentItems.get(i), trackEntity.getItemsToString());
-            i++;
+        try {
+            Dao<Track, Integer> trackDao = getHelper().getTrackDao();
+            final List<Track> trackList = trackDao.queryForAll();
+            for (Track track: trackList) {
+                String trackName = track.getName();
+                parentItems.add(trackName);
+                childItems.put(trackName, track.getLocationsToString());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         adapter = new ExpandableListAdapter(this, parentItems, childItems);

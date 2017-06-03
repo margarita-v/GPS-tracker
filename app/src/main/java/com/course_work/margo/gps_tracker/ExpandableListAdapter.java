@@ -13,6 +13,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.location.TrackList;
+import com.course_work.margo.gps_tracker.models.Track;
+import com.course_work.margo.gps_tracker.models.TrackItem;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +26,19 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Context context;
     private List<String> trackHeaders;
     private HashMap<String, List<String>> trackItems;
+
+    //region Using a database helper
+    private DatabaseHelper databaseHelper = null;
+    private Dao<Track, Integer> trackDao;
+    private Dao<TrackItem, Integer> locationDao;
+
+    private DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper = OpenHelperManager.getHelper(context, DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
+    //endregion
 
     ExpandableListAdapter(Context context,
                           List<String> headers,
@@ -93,8 +110,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                     context.startActivity(intent);
                 }
                 else
-                    MainActivity.createAlertDialog(context,
-                            R.string.alert_empty_track_title, R.string.alert_empty_track_message);
+                    MainActivity.createAlertDialog(context, R.string.alert_empty_track_title, R.string.alert_empty_track_message);
             }
         });
         // Delete chosen track

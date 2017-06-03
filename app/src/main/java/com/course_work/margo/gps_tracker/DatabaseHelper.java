@@ -41,19 +41,19 @@ class DatabaseHelper extends OrmLiteSqliteOpenHelper{
             TableUtils.dropTable(connectionSource, TrackItem.class, true);
             onCreate(database, connectionSource);
         } catch (SQLException e) {
-            Log.e(DatabaseHelper.class.getName(), "Unable to upgrade database from version " + oldVersion + " to new "
-                    + newVersion, e);
+            Log.e(DatabaseHelper.class.getName(), "Unable to upgrade database from version " + oldVersion +
+                    " to new " + newVersion, e);
         }
     }
 
-    public Dao<Track, Integer> getTeacherDao() throws SQLException {
+    Dao<Track, Integer> getTrackDao() throws SQLException {
         if (trackDao == null) {
             trackDao = getDao(Track.class);
         }
         return trackDao;
     }
 
-    public Dao<TrackItem, Integer> getStudentDao() throws SQLException {
+    Dao<TrackItem, Integer> getLocationDao() throws SQLException {
         if (locationDao == null) {
             locationDao = getDao(TrackItem.class);
         }

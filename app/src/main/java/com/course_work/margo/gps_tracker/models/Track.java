@@ -5,6 +5,9 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @DatabaseTable(tableName = Track.TABLE_NAME_TRACKS)
 public class Track {
     static final String TABLE_NAME_TRACKS = "tracks";
@@ -16,7 +19,7 @@ public class Track {
     @DatabaseField(columnName = FIELD_NAME_ID, generatedId = true)
     private int id;
 
-    @DatabaseField(columnName = FIELD_NAME_NAME, canBeNull = false)
+    @DatabaseField(columnName = FIELD_NAME_NAME)
     private String name;
 
     @ForeignCollectionField(columnName = FIELD_NAME_LOCATIONS, eager = true)
@@ -28,5 +31,17 @@ public class Track {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<String> getLocationsToString() {
+        List<String> result = new ArrayList<>();
+        for (TrackItem location: locations) {
+            result.add(location.toString());
+        }
+        return result;
     }
 }
