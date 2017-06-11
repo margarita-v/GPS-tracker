@@ -136,7 +136,6 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                             trackHeaders.remove(headerTitle);
                             Track track = getHelper().getTrackByName(headerTitle);
 
-                            track.getLocations().clear();
                             trackDao.delete(track);
 
                             // Checking if the track list is empty

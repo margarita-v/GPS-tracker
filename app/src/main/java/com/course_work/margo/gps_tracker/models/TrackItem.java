@@ -31,7 +31,9 @@ public class TrackItem {
     @DatabaseField(columnName = FIELD_NAME_SPEED)
     private float speed;
 
-    @DatabaseField(columnName = FIELD_NAME_TRACK, foreign = true, foreignAutoRefresh = true)
+    @DatabaseField(columnName = FIELD_NAME_TRACK, foreign = true, foreignAutoRefresh = true,
+            canBeNull = false, index = true,
+            columnDefinition = "INTEGER CONSTRAINT FK_TRACK REFERENCES tracks(id) ON DELETE CASCADE")
     private Track track;
 
     public TrackItem() { }
