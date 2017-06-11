@@ -8,6 +8,7 @@ import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
@@ -30,7 +31,7 @@ class DatabaseHelper extends OrmLiteSqliteOpenHelper{
             TableUtils.createTable(connectionSource, Track.class);
             TableUtils.createTable(connectionSource, TrackItem.class);
         } catch (SQLException e) {
-            Log.e(DatabaseHelper.class.getName(), "Unable to create databases", e);
+            Log.e(DatabaseHelper.class.getName(), "Unable to create tables", e);
         }
     }
 
@@ -44,6 +45,13 @@ class DatabaseHelper extends OrmLiteSqliteOpenHelper{
             Log.e(DatabaseHelper.class.getName(), "Unable to upgrade database from version " + oldVersion +
                     " to new " + newVersion, e);
         }
+    }
+
+    @Override
+    public void close() {
+        trackDao = null;
+        locationDao = null;
+        super.close();
     }
 
     Dao<Track, Integer> getTrackDao() throws SQLException {
@@ -60,10 +68,9 @@ class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         return locationDao;
     }
 
-    @Override
-    public void close() {
-        trackDao = null;
-        locationDao = null;
-        super.close();
+    Track getTrackByName(String name) throws SQLException {
+        QueryBuilder<Track, Integer> queryBuilder = getTrackDao().queryBuilder();
+        queryBuilder.where().eq(Track.FIELD_NAME_NAME, name);
+        return getTrackDao().queryForFirst(queryBuilder.prepare());
     }
 }

@@ -1,5 +1,6 @@
 package com.course_work.margo.gps_tracker.models;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -13,13 +14,13 @@ public class Track {
     static final String TABLE_NAME_TRACKS = "tracks";
 
     private static final String FIELD_NAME_ID        = "id";
-    private static final String FIELD_NAME_NAME      = "name";
+    public  static final String FIELD_NAME_NAME      = "name";
     private static final String FIELD_NAME_LOCATIONS = "locations";
 
     @DatabaseField(columnName = FIELD_NAME_ID, generatedId = true)
     private int id;
 
-    @DatabaseField(columnName = FIELD_NAME_NAME)
+    @DatabaseField(columnName = FIELD_NAME_NAME, unique = true)
     private String name;
 
     @ForeignCollectionField(columnName = FIELD_NAME_LOCATIONS, eager = true)
@@ -41,6 +42,14 @@ public class Track {
         List<String> result = new ArrayList<>();
         for (TrackItem location: locations) {
             result.add(location.toString());
+        }
+        return result;
+    }
+
+    public List<LatLng> getLocationsAsLatLng() {
+        List<LatLng> result = new ArrayList<>();
+        for (TrackItem location: locations) {
+            result.add(new LatLng(location.getLatitude(), location.getLongitude()));
         }
         return result;
     }

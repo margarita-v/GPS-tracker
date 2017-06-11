@@ -55,23 +55,22 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private Location mCurrentLocation;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    protected LocationSettingsRequest mLocationSettingsRequest;
+    private LocationSettingsRequest mLocationSettingsRequest;
 
-    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    private static final long UPDATE_INTERVAL = 4000;
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private static final long UPDATE_INTERVAL  = 4000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
     private static final String TAG = "myLog";
-    private final String message = "Waiting for a GPS signal...\n";
+    private static final String message = "Waiting for a GPS signal...\n";
 
     // blocking the transition to sleep
     private PowerManager.WakeLock wakeLock;
 
     private WaitingProgressDialog dialogAsyncTask;
-    private final int max = 30;
+    private static final int MAX = 30;
     private TextView tvLocation;
     private Track currentTrack;
-    private long countOfTracks;
 
     private boolean isPaused  = false;
     private boolean isStopped = true;
@@ -131,12 +130,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         btnViewTracks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                long countOfTracks = 0;
                 try {
                     countOfTracks = trackDao.countOf();
                 } catch (SQLException e) {
                     Log.d(TAG, "Track count exception");
                 }
-                if (currentTrack == null && countOfTracks > 0)
+                if (currentTrack == null && countOfTracks == 0)
                     createAlertDialog(MainActivity.this, R.string.alert_empty_list_title, R.string.alert_empty_list_message);
                 else {
                     Intent intent = new Intent(MainActivity.this, TracksActivity.class);
@@ -440,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             dialog.setIndeterminate(false);
             dialog.setCancelable(false);
             dialog.setProgress(0);
-            dialog.setMax(max);
+            dialog.setMax(MAX);
             dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Close", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -453,7 +453,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         @Override
         protected Void doInBackground(Void... params) {
             int currentProgress = 1;
-            while (currentProgress <= max && mCurrentLocation == null && !isCancelled()) {
+            while (currentProgress <= MAX && mCurrentLocation == null && !isCancelled()) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {

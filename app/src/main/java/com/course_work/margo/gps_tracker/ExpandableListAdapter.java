@@ -12,12 +12,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.course_work.margo.gps_tracker.location.TrackList;
 import com.course_work.margo.gps_tracker.models.Track;
-import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,7 +29,6 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     //region Using a database helper
     private DatabaseHelper databaseHelper = null;
     private Dao<Track, Integer> trackDao;
-    private Dao<TrackItem, Integer> locationDao;
 
     private DatabaseHelper getHelper() {
         if (databaseHelper == null) {
@@ -46,6 +44,11 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.context = context;
         this.trackHeaders = headers;
         this.trackItems = items;
+        try {
+            trackDao = getHelper().getTrackDao();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -104,13 +107,20 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         imgBtnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TrackList.getTrack(groupPosition).size() > 0) {
-                    Intent intent = new Intent(context, MapsActivity.class);
-                    intent.putExtra("trackNumber", groupPosition);
-                    context.startActivity(intent);
+                try {
+                    Track track = getHelper().getTrackByName(headerTitle);
+                    // Checking if the current track is empty
+                    if (track.getLocations().size() > 0) {
+                        Intent intent = new Intent(context, MapsActivity.class);
+                        intent.putExtra("trackName", headerTitle);
+                        context.startActivity(intent);
+                    }
+                    else
+                        MainActivity.createAlertDialog(context, R.string.alert_empty_track_title, R.string.alert_empty_track_message);
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-                else
-                    MainActivity.createAlertDialog(context, R.string.alert_empty_track_title, R.string.alert_empty_track_message);
             }
         });
         // Delete chosen track
@@ -118,28 +128,34 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(R.string.delete_confirm_title)
-                        .setMessage(R.string.delete_confirm_message);
+                builder.setTitle(R.string.delete_confirm_title).setMessage(R.string.delete_confirm_message);
 
                 builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // User clicked OK button
-                        trackHeaders.remove(headerTitle);
-                        TrackList.removeTrack(groupPosition);
-                        if (TrackList.size() == 0) {
-                            Toast.makeText(context, R.string.alert_empty_list_title, Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(context, MainActivity.class);
-                            context.startActivity(intent);
+                        try {
+                            trackHeaders.remove(headerTitle);
+                            Track track = getHelper().getTrackByName(headerTitle);
+
+                            track.getLocations().clear();
+                            trackDao.delete(track);
+
+                            // Checking if the track list is empty
+                            long countOfTracks = trackDao.countOf();
+                            if (countOfTracks == 0) {
+                                Toast.makeText(context, R.string.alert_empty_list_title, Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(context, MainActivity.class);
+                                context.startActivity(intent);
+                            }
+                            else
+                                notifyDataSetChanged();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
                         }
-                        else
-                            notifyDataSetChanged();
                     }
                 });
-
                 builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) { }
                 });
-
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
@@ -156,10 +172,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.list_item, null);
         }
-
         TextView txtListChild = (TextView) convertView.findViewById(R.id.trackItem);
         txtListChild.setText(childText);
-
         return convertView;
     }
 

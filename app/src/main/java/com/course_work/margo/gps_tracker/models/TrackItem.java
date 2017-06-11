@@ -48,4 +48,12 @@ public class TrackItem {
     public String toString() {
         return "Latitude: " + this.latitude + ", longitude: " + this.longitude;
     }
+
+    double getLatitude() {
+        return this.latitude;
+    }
+
+    double getLongitude() {
+        return this.longitude;
+    }
 }
