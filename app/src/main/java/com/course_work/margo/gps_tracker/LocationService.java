@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
+import com.course_work.margo.gps_tracker.interfaces.LocationSettingsSuccess;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -20,7 +21,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
 public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, LocationSettingsSuccess {
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
@@ -39,6 +40,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
+        MainActivity.setLocationSettingsSuccess(this);
     }
 
     @Override
@@ -85,7 +87,11 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     public void onConnected(@Nullable Bundle bundle) {
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
         locationSettingsCallback.onCheckLocationSettings(mGoogleApiClient, mLocationSettingsRequest);
-        // ADD CALLBACK!!!!!!!
+    }
+
+    @Override
+    public void onAcceptLocationSettings() {
+        Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this,

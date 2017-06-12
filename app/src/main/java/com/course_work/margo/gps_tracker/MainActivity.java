@@ -24,6 +24,7 @@ import android.widget.Toast;
 import android.Manifest;
 
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
+import com.course_work.margo.gps_tracker.interfaces.LocationSettingsSuccess;
 import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -44,7 +45,8 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         ActivityCompat.OnRequestPermissionsResultCallback, LocationSettingsCallback {
 
     private Button btnStart, btnPause, btnStop;
-    
+
+    private static LocationSettingsSuccess locationSettingsSuccess;
     private Location mCurrentLocation;
 
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -58,6 +60,10 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
 
     private boolean isPaused  = false;
     private boolean isStopped = true;
+
+    public static void setLocationSettingsSuccess(LocationSettingsSuccess callback) {
+        locationSettingsSuccess = callback;
+    }
 
     //region Using a database helper
     private DatabaseHelper databaseHelper = null;
@@ -103,9 +109,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeState(false, true);
-                currentTrack = null;
-                stopService(new Intent(MainActivity.this, LocationService.class));
+                stopLocationUpdates();
             }
         });
 
@@ -151,6 +155,12 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         }
     }
 
+    private void stopLocationUpdates() {
+        changeState(false, true);
+        currentTrack = null;
+        stopService(new Intent(MainActivity.this, LocationService.class));
+    }
+
     protected void checkLocationSettings() {
         // Check if permission is granted
         if (ContextCompat.checkSelfPermission(this,
@@ -161,15 +171,6 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                     REQUEST_CHECK_SETTINGS);
         else
             startTracking();
-        /*else {
-            // It will be always called for Android versions below 6.0
-            // Results provided through a PendingResult
-            startTracking();
-            LocationServices.SettingsApi.onCheckLocationSettings(
-                    locationService.getmGoogleApiClient(),
-                    locationService.getmLocationSettingsRequest()).setResultCallback(this);
-            //startTracking();
-        }*/
     }
 
     @Override
@@ -197,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         final Status status = locationSettingsResult.getStatus();
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
-                startTracking();
+                locationSettingsSuccess.onAcceptLocationSettings();
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                 try {
@@ -220,9 +221,10 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-                        startTracking();
+                        locationSettingsSuccess.onAcceptLocationSettings();
                         break;
                     case Activity.RESULT_CANCELED:
+                        stopLocationUpdates();
                         break;
                 }
                 break;

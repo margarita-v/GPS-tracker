@@ -1,5 +1,5 @@
 package com.course_work.margo.gps_tracker.interfaces;
 
-public interface LocationSettingsResult {
+public interface LocationSettingsSuccess {
     void onAcceptLocationSettings();
 }
