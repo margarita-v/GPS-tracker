@@ -25,7 +25,6 @@ import android.Manifest;
 
 import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationSettingsResult;
@@ -90,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             @Override
             public void onClick(View v) {
                 changeState(true, false);
-                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!1
                 stopService(new Intent(MainActivity.this, LocationService.class));
             }
         });
@@ -158,8 +156,9 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         else {
             // It will be always called for Android versions below 6.0
             // Results provided through a PendingResult
-            //PendingResult<LocationSettingsResult> result = LocationService.checkLocationSettings();
-            //result.setResultCallback(this);
+            /*LocationServices.SettingsApi.checkLocationSettings(
+                    mGoogleApiClient,
+                    mLocationSettingsRequest).setResultCallback(this);*/
             startTracking();
         }
     }
@@ -236,13 +235,13 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             isPaused = false;
         startService(new Intent(this, LocationService.class));
         // Print progress dialog while location hasn't received
-        /*if (mCurrentLocation == null) {
+        if (mCurrentLocation == null) {
             tvLocation.setText(message);
             WaitingProgressDialog dialogAsyncTask = new WaitingProgressDialog();
             dialogAsyncTask.execute();
         }
         else
-            Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();*/
+            Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();
     }
 
     //region Functions for correct UI state
