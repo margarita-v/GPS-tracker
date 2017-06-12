@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
+import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -23,9 +24,14 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
+    private static LocationSettingsCallback locationSettingsCallback;
 
     private static final long UPDATE_INTERVAL = 4000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
+
+    public static void setLocationSettingsCallback(LocationSettingsCallback callback) {
+        locationSettingsCallback = callback;
+    }
 
     @Override
     public void onCreate() {
@@ -78,6 +84,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        locationSettingsCallback.onCheckLocationSettings(mGoogleApiClient, mLocationSettingsRequest);
+        // ADD CALLBACK!!!!!!!
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this,

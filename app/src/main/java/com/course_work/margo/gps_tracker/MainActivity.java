@@ -23,10 +23,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 
+import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
 import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -37,10 +41,10 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements ResultCallback<LocationSettingsResult>,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        ActivityCompat.OnRequestPermissionsResultCallback, LocationSettingsCallback {
 
     private Button btnStart, btnPause, btnStop;
-
+    
     private Location mCurrentLocation;
 
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -127,6 +131,8 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
 
         tvLocation = (TextView) findViewById(R.id.tvLocation);
         currentTrack = null;
+        LocationService.setLocationSettingsCallback(this);
+
         try {
             trackDao = getHelper().getTrackDao();
             locationDao = getHelper().getLocationDao();
@@ -153,14 +159,17 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             ActivityCompat.requestPermissions(this,
                     new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
                     REQUEST_CHECK_SETTINGS);
-        else {
+        else
+            startTracking();
+        /*else {
             // It will be always called for Android versions below 6.0
             // Results provided through a PendingResult
-            /*LocationServices.SettingsApi.checkLocationSettings(
-                    mGoogleApiClient,
-                    mLocationSettingsRequest).setResultCallback(this);*/
             startTracking();
-        }
+            LocationServices.SettingsApi.onCheckLocationSettings(
+                    locationService.getmGoogleApiClient(),
+                    locationService.getmLocationSettingsRequest()).setResultCallback(this);
+            //startTracking();
+        }*/
     }
 
     @Override
@@ -174,6 +183,13 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                     startTracking();
             }
         }
+    }
+
+    @Override
+    public void onCheckLocationSettings(GoogleApiClient googleApiClient,
+                                        LocationSettingsRequest locationSettingsRequest) {
+        LocationServices.SettingsApi.checkLocationSettings(googleApiClient, locationSettingsRequest)
+                .setResultCallback(this);
     }
 
     @Override
@@ -235,13 +251,13 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             isPaused = false;
         startService(new Intent(this, LocationService.class));
         // Print progress dialog while location hasn't received
-        if (mCurrentLocation == null) {
+        /*if (mCurrentLocation == null) {
             tvLocation.setText(message);
             WaitingProgressDialog dialogAsyncTask = new WaitingProgressDialog();
             dialogAsyncTask.execute();
         }
         else
-            Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();*/
     }
 
     //region Functions for correct UI state
