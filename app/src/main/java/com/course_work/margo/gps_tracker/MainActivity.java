@@ -3,6 +3,7 @@ package com.course_work.margo.gps_tracker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,9 +11,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,17 +25,9 @@ import android.Manifest;
 
 import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -46,28 +37,18 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity implements ConnectionCallbacks,
-        OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>,
+public class MainActivity extends AppCompatActivity implements ResultCallback<LocationSettingsResult>,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     private Button btnStart, btnPause, btnStop;
 
     private Location mCurrentLocation;
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private LocationSettingsRequest mLocationSettingsRequest;
 
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
-    private static final long UPDATE_INTERVAL  = 4000;
-    private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
     private static final String TAG = "myLog";
     private static final String message = "Waiting for a GPS signal...\n";
 
-    // blocking the transition to sleep
-    private PowerManager.WakeLock wakeLock;
-
-    private WaitingProgressDialog dialogAsyncTask;
     private static final int MAX = 30;
     private TextView tvLocation;
     private Track currentTrack;
@@ -109,7 +90,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             @Override
             public void onClick(View v) {
                 changeState(true, false);
-                stopLocationUpdates();
+                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+                stopService(new Intent(MainActivity.this, LocationService.class));
             }
         });
 
@@ -121,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             public void onClick(View v) {
                 changeState(false, true);
                 currentTrack = null;
-                stopLocationUpdates();
+                stopService(new Intent(MainActivity.this, LocationService.class));
             }
         });
 
@@ -145,10 +127,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             }
         });
 
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "No sleep");
-        wakeLock.acquire();
-
         tvLocation = (TextView) findViewById(R.id.tvLocation);
         currentTrack = null;
         try {
@@ -157,72 +135,16 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         } catch (SQLException e) {
             Log.d(TAG, "Get dao exception");
         }
-        buildGoogleApiClient();
-        createLocationRequest();
-        buildLocationSettingsRequest();
-    }
-
-    //region Activity lifecycle methods
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "Start");
-        if (mGoogleApiClient != null)
-            mGoogleApiClient.connect();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "Resume");
-        if (mGoogleApiClient.isConnected() && !isPaused && !isStopped)
-            startLocationUpdates();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mGoogleApiClient.isConnected() && isPaused)
-            stopLocationUpdates();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mGoogleApiClient.isConnected() && isStopped)
-            mGoogleApiClient.disconnect();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        wakeLock.release();
+        Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
         if (databaseHelper != null) {
             OpenHelperManager.releaseHelper();
             databaseHelper = null;
         }
-    }
-    //endregion
-
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    protected void buildLocationSettingsRequest() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        mLocationSettingsRequest = builder.build();
     }
 
     protected void checkLocationSettings() {
@@ -235,13 +157,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     REQUEST_CHECK_SETTINGS);
         else {
             // It will be always called for Android versions below 6.0
-            PendingResult<LocationSettingsResult> result =
-                    LocationServices.SettingsApi.checkLocationSettings(
-                            mGoogleApiClient,
-                            mLocationSettingsRequest
-                    );
-            // results provided through a PendingResult
-            result.setResultCallback(this);
+            // Results provided through a PendingResult
+            //PendingResult<LocationSettingsResult> result = LocationService.checkLocationSettings();
+            //result.setResultCallback(this);
+            startTracking();
         }
     }
 
@@ -315,86 +234,15 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         }
         else
             isPaused = false;
-        startLocationUpdates();
+        startService(new Intent(this, LocationService.class));
         // Print progress dialog while location hasn't received
-        if (mCurrentLocation == null) {
+        /*if (mCurrentLocation == null) {
             tvLocation.setText(message);
-            dialogAsyncTask = new WaitingProgressDialog();
+            WaitingProgressDialog dialogAsyncTask = new WaitingProgressDialog();
             dialogAsyncTask.execute();
         }
         else
-            Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();
-    }
-
-    protected void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient,
-                mLocationRequest,
-                this
-        ).setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(@NonNull Status status) {
-                Log.d(TAG, "Tracking goes");
-            }
-        });
-    }
-
-    protected void stopLocationUpdates() {
-        // It is a good practice to remove location requests when the activity is in a paused or
-        // stopped state. Doing so helps battery performance and is especially
-        // recommended in applications that request frequent location updates.
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient,
-                this
-        ).setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(@NonNull Status status) {
-                if (dialogAsyncTask != null && !dialogAsyncTask.isCancelled()) {
-                    dialogAsyncTask.cancel(true);
-                    tvLocation.setText("");
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (mCurrentLocation == null) {
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            Log.d(TAG, "Connected");
-            //mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            //printCurrentLocation();
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mCurrentLocation = location;
-        try {
-            locationDao.create(new TrackItem(mCurrentLocation, currentTrack));
-        } catch (SQLException e) {
-            Log.d(TAG, "Can't create locationDao");
-        }
-        printCurrentLocation();
+            Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();*/
     }
 
     //region Functions for correct UI state
@@ -427,6 +275,21 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         dialog.show();
     }
     //endregion
+
+    // Receiver for results of LocationService
+    private class LocationReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mCurrentLocation = (Location) getIntent().getSerializableExtra("Location");
+            try {
+                locationDao.create(new TrackItem(mCurrentLocation, currentTrack));
+            } catch (SQLException e) {
+                Log.d(TAG, "Can't create locationDao");
+            }
+            printCurrentLocation();
+        }
+    }
 
     // Progress dialog for waiting for GPS signal
     private class WaitingProgressDialog extends AsyncTask<Void, Integer, Void> {

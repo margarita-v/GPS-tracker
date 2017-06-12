@@ -5,15 +5,17 @@ import android.location.Location;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.io.Serializable;
+
 @DatabaseTable(tableName = TrackItem.TABLE_NAME_LOCATIONS)
-public class TrackItem {
+public class TrackItem implements Serializable {
     static final String TABLE_NAME_LOCATIONS = "locations";
 
     private static final String FIELD_NAME_ID        = "id";
-    private static final String FIELD_NAME_LATITUDE  = "latitude";
-    private static final String FIELD_NAME_LONGITUDE = "longitude";
-    private static final String FIELD_NAME_TIME      = "time";
-    private static final String FIELD_NAME_SPEED     = "speed";
+    public  static final String FIELD_NAME_LATITUDE  = "latitude";
+    public  static final String FIELD_NAME_LONGITUDE = "longitude";
+    public  static final String FIELD_NAME_TIME      = "time";
+    public  static final String FIELD_NAME_SPEED     = "speed";
     private static final String FIELD_NAME_TRACK     = "track";
 
     @DatabaseField(columnName = FIELD_NAME_ID, generatedId = true)

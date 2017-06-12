@@ -19,18 +19,19 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".TracksActivity"
             android:label="@string/title_activity_tracks"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -47,6 +48,10 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"
             android:parentActivityName=".TracksActivity" />
+
+        <service
+            android:name=".LocationService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
