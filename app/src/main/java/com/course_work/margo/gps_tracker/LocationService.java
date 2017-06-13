@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsSuccess;
@@ -78,27 +77,14 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        // Callback to activity; before start receive location updates, we should check location settings
         locationSettingsCallback.onCheckLocationSettings(mGoogleApiClient, mLocationSettingsRequest);
-    }
-
-    @Override
-    public void onAcceptLocationSettings() {
-        Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override
@@ -109,6 +95,18 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    // Callback from activity: location settings are accepted
+    @Override
+    public void onAcceptLocationSettings() {
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override

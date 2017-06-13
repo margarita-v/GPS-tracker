@@ -20,7 +20,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.Manifest;
 
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
@@ -148,19 +147,13 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
         if (databaseHelper != null) {
             OpenHelperManager.releaseHelper();
             databaseHelper = null;
         }
     }
 
-    private void stopLocationUpdates() {
-        changeState(false, true);
-        currentTrack = null;
-        stopService(new Intent(MainActivity.this, LocationService.class));
-    }
-
+    // Check permission for receive location updates and start service
     protected void checkLocationSettings() {
         // Check if permission is granted
         if (ContextCompat.checkSelfPermission(this,
@@ -170,9 +163,10 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                     new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
                     REQUEST_CHECK_SETTINGS);
         else
-            startTracking();
+            startService(new Intent(this, LocationService.class));
     }
 
+    // Result of checking permissions
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[], @NonNull int[] grantResults) {
@@ -181,11 +175,12 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    startTracking();
+                    startService(new Intent(this, LocationService.class));
             }
         }
     }
 
+    // Callback from service; before start receive location updates, we should check location settings
     @Override
     public void onCheckLocationSettings(GoogleApiClient googleApiClient,
                                         LocationSettingsRequest locationSettingsRequest) {
@@ -193,17 +188,19 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                 .setResultCallback(this);
     }
 
+    // Result of checking locations settings
     @Override
     public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
         final Status status = locationSettingsResult.getStatus();
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
+                // Callback to service; location settings are enabled
+                startTracking();
                 locationSettingsSuccess.onAcceptLocationSettings();
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                 try {
-                    // Show the dialog by calling startResolutionForResult(), and check the result
-                    // in onActivityResult().
+                    // Request location settings
                     status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
                 } catch (IntentSender.SendIntentException e) {
                     Log.d(TAG, "Check settings exception");
@@ -214,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         }
     }
 
+    // Result for location settings request
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
@@ -221,6 +219,8 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
+                        // Callback to service; location settings are accepted
+                        startTracking();
                         locationSettingsSuccess.onAcceptLocationSettings();
                         break;
                     case Activity.RESULT_CANCELED:
@@ -232,9 +232,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
     }
 
     private void startTracking() {
-        btnStart.setEnabled(false);
-        btnPause.setEnabled(true);
-        btnStop.setEnabled(true);
+        changeState(false, false);
         // Use current date and time as a track's name
         DateFormat dateFormat = DateFormat.getDateTimeInstance();
         Calendar calendar = Calendar.getInstance();
@@ -251,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         }
         else
             isPaused = false;
-        startService(new Intent(this, LocationService.class));
         // Print progress dialog while location hasn't received
         /*if (mCurrentLocation == null) {
             tvLocation.setText(message);
@@ -260,6 +257,13 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         }
         else
             Toast.makeText(this, R.string.start_tracking_title, Toast.LENGTH_SHORT).show();*/
+    }
+
+    // Call when service for location updates is stopped
+    private void stopLocationUpdates() {
+        changeState(false, true);
+        currentTrack = null;
+        stopService(new Intent(MainActivity.this, LocationService.class));
     }
 
     //region Functions for correct UI state
