@@ -1,5 +1,6 @@
 package com.course_work.margo.gps_tracker;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -142,8 +143,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 long countOfTracks = trackDao.countOf();
                                 if (countOfTracks == 0) {
                                     Toast.makeText(context, R.string.alert_empty_list_title, Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(context, MainActivity.class);
-                                    context.startActivity(intent);
+                                    ((Activity)context).finish();
                                 } else
                                     notifyDataSetChanged();
                             } catch (SQLException e) {
