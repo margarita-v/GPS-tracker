@@ -8,6 +8,7 @@ import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
@@ -72,5 +73,15 @@ class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         QueryBuilder<Track, Integer> queryBuilder = getTrackDao().queryBuilder();
         queryBuilder.where().eq(Track.FIELD_NAME_NAME, name);
         return getTrackDao().queryForFirst(queryBuilder.prepare());
+    }
+
+    void deleteTrackByName(String name) throws SQLException {
+        Track track = getTrackByName(name);
+        int trackId = track.getId();
+        getTrackDao().delete(track);
+        // Delete all locations for this track
+        DeleteBuilder deleteBuilder = getLocationDao().deleteBuilder();
+        deleteBuilder.where().eq(TrackItem.FIELD_NAME_TRACK, trackId);
+        getLocationDao().delete(deleteBuilder.prepare());
     }
 }

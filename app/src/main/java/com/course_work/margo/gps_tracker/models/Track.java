@@ -30,6 +30,10 @@ public class Track {
         return locations;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }

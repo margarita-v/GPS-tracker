@@ -10,11 +10,11 @@ public class TrackItem {
     static final String TABLE_NAME_LOCATIONS = "locations";
 
     private static final String FIELD_NAME_ID        = "id";
-    public  static final String FIELD_NAME_LATITUDE  = "latitude";
-    public  static final String FIELD_NAME_LONGITUDE = "longitude";
-    public  static final String FIELD_NAME_TIME      = "time";
-    public  static final String FIELD_NAME_SPEED     = "speed";
-    private static final String FIELD_NAME_TRACK     = "track";
+    private static final String FIELD_NAME_LATITUDE  = "latitude";
+    private static final String FIELD_NAME_LONGITUDE = "longitude";
+    private static final String FIELD_NAME_TIME      = "time";
+    private static final String FIELD_NAME_SPEED     = "speed";
+    public  static final String FIELD_NAME_TRACK     = "track";
 
     @DatabaseField(columnName = FIELD_NAME_ID, generatedId = true)
     private int id;

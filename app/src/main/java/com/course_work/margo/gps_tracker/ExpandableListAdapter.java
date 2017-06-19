@@ -134,9 +134,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                     public void onClick(DialogInterface dialog, int id) {
                         try {
                             trackHeaders.remove(headerTitle);
-                            Track track = getHelper().getTrackByName(headerTitle);
-
-                            trackDao.delete(track);
+                            getHelper().deleteTrackByName(headerTitle);
 
                             // Checking if the track list is empty
                             long countOfTracks = trackDao.countOf();
