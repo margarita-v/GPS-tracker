@@ -19,6 +19,7 @@ import com.j256.ormlite.dao.Dao;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 class ExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -132,22 +133,25 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                 builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        try {
-                            trackHeaders.remove(headerTitle);
-                            getHelper().deleteTrackByName(headerTitle);
+                        if (!Objects.equals(MainActivity.getLocationName(), headerTitle)) {
+                            try {
+                                trackHeaders.remove(headerTitle);
+                                getHelper().deleteTrackByName(headerTitle);
 
-                            // Checking if the track list is empty
-                            long countOfTracks = trackDao.countOf();
-                            if (countOfTracks == 0) {
-                                Toast.makeText(context, R.string.alert_empty_list_title, Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(context, MainActivity.class);
-                                context.startActivity(intent);
+                                // Checking if the track list is empty
+                                long countOfTracks = trackDao.countOf();
+                                if (countOfTracks == 0) {
+                                    Toast.makeText(context, R.string.alert_empty_list_title, Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(context, MainActivity.class);
+                                    context.startActivity(intent);
+                                } else
+                                    notifyDataSetChanged();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
                             }
-                            else
-                                notifyDataSetChanged();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
                         }
+                        else
+                            MainActivity.createAlertDialog(context, R.string.delete_error_title, R.string.delete_error_message);
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {

@@ -11,6 +11,10 @@
     <string name="delete_confirm_title">Confirmation</string>
     <string name="delete_confirm_message">Are you sure to delete this track?</string>
 
+    <!-- Forbid delete a running track -->
+    <string name="delete_error_title">This route is tracking now</string>
+    <string name="delete_error_message">You should stop tracking this route before delete it.</string>
+
     <!-- Message about waiting for a GPS -->
     <string name="alert_waiting_title">Waiting for a GPS signal</string>
     <string name="alert_waiting_message">Too long waiting for connecting to GPS.

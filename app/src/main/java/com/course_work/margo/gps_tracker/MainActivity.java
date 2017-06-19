@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
     private TextView tvLocation;
 
     private static LocationSettingsSuccess locationSettingsSuccess;
+    private static String locationName = "";
+
     private Location mCurrentLocation;
     private Track currentTrack;
 
@@ -57,6 +59,10 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
 
     private boolean isPaused  = false;
     private boolean isStopped = true;
+
+    public static String getLocationName() {
+        return locationName;
+    }
 
     public static void setLocationSettingsSuccess(LocationSettingsSuccess callback) {
         locationSettingsSuccess = callback;
@@ -243,7 +249,8 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         // if track wasn't paused, then we create new track, else track wil be resumed
         if (!isPaused) {
             currentTrack = new Track();
-            currentTrack.setName(dateFormat.format(calendar.getTime()));
+            locationName = dateFormat.format(calendar.getTime());
+            currentTrack.setName(locationName);
             try {
                 trackDao.create(currentTrack);
             } catch (SQLException e) {
@@ -266,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
     private void stopLocationUpdates() {
         changeState(false, true);
         currentTrack = null;
+        locationName = "";
         stopService(new Intent(MainActivity.this, LocationService.class));
     }
 
