@@ -111,6 +111,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onLocationChanged(Location location) {
-        //sendBroadcast(new Intent().putExtra("Location", location));
+        Intent intent = new Intent(getString(R.string.intent_broadcast));
+        intent.putExtra(getString(R.string.intent_location_changed), location);
+        sendBroadcast(intent);
     }
 }

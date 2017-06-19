@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -44,18 +45,15 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         ActivityCompat.OnRequestPermissionsResultCallback, LocationSettingsCallback {
 
     private Button btnStart, btnPause, btnStop;
+    private TextView tvLocation;
 
     private static LocationSettingsSuccess locationSettingsSuccess;
     private Location mCurrentLocation;
-
-    private static final int REQUEST_CHECK_SETTINGS = 0x1;
-
-    private static final String TAG = "myLog";
-    private static final String message = "Waiting for a GPS signal...\n";
+    private Track currentTrack;
 
     private static final int MAX = 30;
-    private TextView tvLocation;
-    private Track currentTrack;
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private static final String TAG = "myLog";
 
     private boolean isPaused  = false;
     private boolean isStopped = true;
@@ -135,6 +133,11 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         tvLocation = (TextView) findViewById(R.id.tvLocation);
         currentTrack = null;
         LocationService.setLocationSettingsCallback(this);
+
+        // Receive location updates from location service
+        LocationReceiver locationReceiver = new LocationReceiver();
+        IntentFilter intentFilter = new IntentFilter(getString(R.string.intent_broadcast));
+        registerReceiver(locationReceiver, intentFilter);
 
         try {
             trackDao = getHelper().getTrackDao();
@@ -302,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            mCurrentLocation = (Location) getIntent().getSerializableExtra("Location");
+            mCurrentLocation = intent.getParcelableExtra(getString(R.string.intent_location_changed));
             try {
                 locationDao.create(new TrackItem(mCurrentLocation, currentTrack));
             } catch (SQLException e) {
@@ -314,7 +317,8 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
 
     // Progress dialog for waiting for GPS signal
     private class WaitingProgressDialog extends AsyncTask<Void, Integer, Void> {
-        ProgressDialog dialog;
+        private ProgressDialog dialog;
+        private static final String message = "Waiting for a GPS signal...\n";
 
         @Override
         protected void onPreExecute() {

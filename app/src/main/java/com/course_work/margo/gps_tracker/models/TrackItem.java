@@ -5,10 +5,8 @@ import android.location.Location;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-import java.io.Serializable;
-
 @DatabaseTable(tableName = TrackItem.TABLE_NAME_LOCATIONS)
-public class TrackItem implements Serializable {
+public class TrackItem {
     static final String TABLE_NAME_LOCATIONS = "locations";
 
     private static final String FIELD_NAME_ID        = "id";
