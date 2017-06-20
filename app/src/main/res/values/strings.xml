@@ -6,6 +6,7 @@
     <!-- Keys for intents -->
     <string name="intent_broadcast">BROADCAST_ACTION</string>
     <string name="intent_location_changed">LOCATION_CHANGED</string>
+    <string name="intent_track_name">TRACK_NAME</string>
 
     <!-- Delete confirmation -->
     <string name="delete_confirm_title">Confirmation</string>

@@ -114,7 +114,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                     // Checking if the current track is empty
                     if (track.getLocations().size() > 0) {
                         Intent intent = new Intent(context, MapsActivity.class);
-                        intent.putExtra("trackName", headerTitle);
+                        intent.putExtra(context.getString(R.string.intent_track_name), headerTitle);
                         context.startActivity(intent);
                     }
                     else
