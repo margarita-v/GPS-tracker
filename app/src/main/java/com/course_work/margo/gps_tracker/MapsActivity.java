@@ -78,8 +78,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         if (isTrackingRoute)
             unregisterReceiver(locationReceiver);
     }
