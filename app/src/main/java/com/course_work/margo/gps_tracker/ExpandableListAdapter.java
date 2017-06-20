@@ -129,12 +129,15 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         imgBtnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(R.string.delete_confirm_title).setMessage(R.string.delete_confirm_message);
+                // if chosen route is tracking now
+                if (Objects.equals(MainActivity.getLocationName(), headerTitle))
+                    MainActivity.createAlertDialog(context, R.string.delete_error_title, R.string.delete_error_message);
+                else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle(R.string.delete_confirm_title).setMessage(R.string.delete_confirm_message);
 
-                builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (!Objects.equals(MainActivity.getLocationName(), headerTitle)) {
+                    builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
                             try {
                                 trackHeaders.remove(headerTitle);
                                 getHelper().deleteTrackByName(headerTitle);
@@ -143,25 +146,22 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 long countOfTracks = trackDao.countOf();
                                 if (countOfTracks == 0) {
                                     Toast.makeText(context, R.string.alert_empty_list_title, Toast.LENGTH_SHORT).show();
-                                    ((Activity)context).finish();
+                                    ((Activity) context).finish();
                                 } else
                                     notifyDataSetChanged();
                             } catch (SQLException e) {
                                 e.printStackTrace();
                             }
                         }
-                        else
-                            MainActivity.createAlertDialog(context, R.string.delete_error_title, R.string.delete_error_message);
-                    }
-                });
-                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) { }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
+                    });
+                    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) { }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } // Dialog builder for delete track
+            } // onClick
         });
-
         return convertView;
     }
 

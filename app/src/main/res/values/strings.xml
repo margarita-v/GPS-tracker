@@ -34,6 +34,7 @@
     <string name="ok">OK</string>
     <string name="delete">Delete</string>
     <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
 
     <!-- Buttons -->
     <string name="view_tracks">View Tracks</string>

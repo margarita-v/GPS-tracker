@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
 
     private Location mCurrentLocation;
     private Track currentTrack;
+    private Intent serviceIntent;
 
     private static final int MAX = 30;
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             @Override
             public void onClick(View v) {
                 changeState(true, false);
-                stopService(new Intent(MainActivity.this, LocationService.class));
+                stopService(serviceIntent);
             }
         });
 
@@ -139,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         tvLocation = (TextView) findViewById(R.id.tvLocation);
         currentTrack = null;
         LocationService.setLocationSettingsCallback(this);
+        serviceIntent = new Intent(MainActivity.this, LocationService.class);
 
         // Receive location updates from location service
         LocationReceiver locationReceiver = new LocationReceiver();
@@ -172,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                     new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
                     REQUEST_CHECK_SETTINGS);
         else
-            startService(new Intent(this, LocationService.class));
+            startService(serviceIntent);
     }
 
     // Result of checking permissions
@@ -184,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    startService(new Intent(this, LocationService.class));
+                    startService(serviceIntent);
             }
         }
     }
@@ -233,7 +235,10 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                         locationSettingsSuccess.onAcceptLocationSettings();
                         break;
                     case Activity.RESULT_CANCELED:
-                        stopLocationUpdates();
+                        if (!isPaused)
+                            stopLocationUpdates();
+                        else
+                            stopService(serviceIntent);
                         break;
                 }
                 break;
@@ -241,12 +246,10 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
     }
 
     private void startTracking() {
-        changeState(false, false);
         // Use current date and time as a track's name
         DateFormat dateFormat = DateFormat.getDateTimeInstance();
         Calendar calendar = Calendar.getInstance();
-        isStopped = false;
-        // if track wasn't paused, then we create new track, else track wil be resumed
+        // if track wasn't paused, then we create new track, else track will be resumed
         if (!isPaused) {
             currentTrack = new Track();
             locationName = dateFormat.format(calendar.getTime());
@@ -257,8 +260,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                 Log.d(TAG, "Can't create new track");
             }
         }
-        else
-            isPaused = false;
+        changeState(false, false);
         // Print progress dialog while location hasn't received
         /*if (mCurrentLocation == null) {
             tvLocation.setText(message);
@@ -274,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         changeState(false, true);
         currentTrack = null;
         locationName = "";
-        stopService(new Intent(MainActivity.this, LocationService.class));
+        stopService(serviceIntent);
     }
 
     //region Functions for correct UI state
