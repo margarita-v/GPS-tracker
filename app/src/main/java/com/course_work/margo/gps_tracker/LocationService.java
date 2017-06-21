@@ -21,6 +21,8 @@ import com.google.android.gms.location.LocationSettingsRequest;
 
 public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, LocationSettingsSuccess {
+
+    private Location mLastLocation;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
@@ -28,6 +30,9 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     private static final long UPDATE_INTERVAL = 3000;
     private static final long FASTEST_INTERVAL = 2000;
+
+    private static final double MIN_DIFFERENCE = 0.0001;
+    private static final double DIFFERENCE_FOR_ONE_DIMENSION = 2*MIN_DIFFERENCE;
 
     public static void setLocationSettingsCallback(LocationSettingsCallback callback) {
         locationSettingsCallback = callback;
@@ -111,8 +116,20 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onLocationChanged(Location location) {
-        Intent intent = new Intent(getString(R.string.intent_broadcast));
-        intent.putExtra(getString(R.string.intent_location_changed), location);
-        sendBroadcast(intent);
+        if (checkDifference(location.getLatitude(), location.getLongitude())) {
+            mLastLocation = location;
+            Intent intent = new Intent(getString(R.string.intent_broadcast));
+            intent.putExtra(getString(R.string.intent_location_changed), location);
+            sendBroadcast(intent);
+        }
+    }
+
+    private boolean checkDifference(double latitude, double longitude) {
+        if (mLastLocation == null)
+            return true;
+        double latDif = Math.abs(mLastLocation.getLatitude() - latitude);
+        double longDif = Math.abs(mLastLocation.getLongitude() - longitude);
+        return latDif >= MIN_DIFFERENCE && longDif >= MIN_DIFFERENCE ||
+                latDif >= DIFFERENCE_FOR_ONE_DIMENSION || longDif >= DIFFERENCE_FOR_ONE_DIMENSION;
     }
 }
