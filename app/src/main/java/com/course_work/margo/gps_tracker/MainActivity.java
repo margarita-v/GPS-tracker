@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             @Override
             public void onClick(View v) {
                 changeState(true, false);
+                tvLocation.setText(R.string.pause_tracking);
                 stopService(serviceIntent);
             }
         });
@@ -207,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             case LocationSettingsStatusCodes.SUCCESS:
                 // Callback to service; location settings are enabled
                 startTracking();
-                locationSettingsSuccess.onAcceptLocationSettings();
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                 try {
@@ -232,7 +232,6 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
                     case Activity.RESULT_OK:
                         // Callback to service; location settings are accepted
                         startTracking();
-                        locationSettingsSuccess.onAcceptLocationSettings();
                         break;
                     case Activity.RESULT_CANCELED:
                         if (!isPaused)
@@ -261,6 +260,8 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             }
         }
         changeState(false, false);
+        tvLocation.setText(R.string.alert_waiting_title);
+        locationSettingsSuccess.onAcceptLocationSettings();
         // Print progress dialog while location hasn't received
         /*if (mCurrentLocation == null) {
             tvLocation.setText(message);
@@ -276,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         changeState(false, true);
         currentTrack = null;
         locationName = "";
+        tvLocation.setText("");
         stopService(serviceIntent);
     }
 
@@ -291,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
     private void printCurrentLocation() {
         if (mCurrentLocation != null) {
             String item = "Latitude: " + mCurrentLocation.getLatitude() +
-                    " , Longitude: " + mCurrentLocation.getLongitude();
+                    ", Longitude: " + mCurrentLocation.getLongitude();
             tvLocation.setText(item);
         }
     }

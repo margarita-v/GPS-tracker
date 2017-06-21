@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class TracksActivity extends AppCompatActivity {
 
@@ -72,6 +73,19 @@ public class TracksActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(locationReceiver, intentFilter);
+        // If maps activity was closed, then the running track was changed and we should rewrite it
+        String trackName = MainActivity.getLocationName();
+        try {
+            Track track = getHelper().getTrackByName(trackName);
+            // If track is running now and locations were added, we should update list element
+            if (!Objects.equals(trackName, "")
+                    && childItems.get(trackName).size() != track.getLocations().size()) {
+                childItems.put(trackName, track.getLocationsToString());
+                adapter.notifyDataSetChanged();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

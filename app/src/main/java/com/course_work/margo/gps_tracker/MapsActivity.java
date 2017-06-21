@@ -28,10 +28,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Track currentTrack;
     private LatLng lastPoint;
 
-    private LocationReceiver locationReceiver;
-    private IntentFilter intentFilter;
-
-    private boolean isTrackingRoute;
     private static final int LINE_WIDTH = 5;
     private static final int ZOOM_LEVEL = 17;
 
@@ -56,13 +52,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        locationReceiver = new LocationReceiver();
-        intentFilter = new IntentFilter(getString(R.string.intent_broadcast));
-    }
+        LocationReceiver locationReceiver = new LocationReceiver();
+        IntentFilter intentFilter = new IntentFilter(getString(R.string.intent_broadcast));
 
-    @Override
-    protected void onResume() {
-        super.onResume();
         Intent intent = getIntent();
         String trackName = intent.getStringExtra(getString(R.string.intent_track_name));
         try {
@@ -72,16 +64,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         setTitle(trackName);
         // Receive location updates from location service
-        isTrackingRoute = Objects.equals(MainActivity.getLocationName(), trackName);
+        boolean isTrackingRoute = Objects.equals(MainActivity.getLocationName(), trackName);
         if (isTrackingRoute)
             registerReceiver(locationReceiver, intentFilter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (isTrackingRoute)
-            unregisterReceiver(locationReceiver);
     }
 
     @Override
@@ -104,8 +89,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         lastPoint = items.get(items.size() - 1);
 
-        // move camera to beginning of the track
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(items.get(0), ZOOM_LEVEL));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint, ZOOM_LEVEL));
     }
 
     // Receiver for results of LocationService

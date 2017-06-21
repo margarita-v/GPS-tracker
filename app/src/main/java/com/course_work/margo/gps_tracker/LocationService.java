@@ -26,8 +26,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     private LocationSettingsRequest mLocationSettingsRequest;
     private static LocationSettingsCallback locationSettingsCallback;
 
-    private static final long UPDATE_INTERVAL = 4000;
-    private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
+    private static final long UPDATE_INTERVAL = 3000;
+    private static final long FASTEST_INTERVAL = 2000;
 
     public static void setLocationSettingsCallback(LocationSettingsCallback callback) {
         locationSettingsCallback = callback;
