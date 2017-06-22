@@ -116,7 +116,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onLocationChanged(Location location) {
-        if (checkDifference(location.getLatitude(), location.getLongitude())) {
+        if (location.getAccuracy() < 100 && checkDifference(location.getLatitude(), location.getLongitude())) {
             mLastLocation = location;
             Intent intent = new Intent(getString(R.string.intent_broadcast));
             intent.putExtra(getString(R.string.intent_location_changed), location);

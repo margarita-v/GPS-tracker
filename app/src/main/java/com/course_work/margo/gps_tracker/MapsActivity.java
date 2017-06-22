@@ -64,7 +64,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         setTitle(trackName);
         // Receive location updates from location service
-        boolean isTrackingRoute = Objects.equals(MainActivity.getLocationName(), trackName);
+        boolean isTrackingRoute = Objects.equals(MainActivity.getTrackName(), trackName);
         if (isTrackingRoute)
             registerReceiver(locationReceiver, intentFilter);
     }

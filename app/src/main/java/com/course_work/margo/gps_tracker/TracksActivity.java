@@ -74,7 +74,7 @@ public class TracksActivity extends AppCompatActivity {
         super.onResume();
         registerReceiver(locationReceiver, intentFilter);
         // If maps activity was closed, then the running track was changed and we should rewrite it
-        String trackName = MainActivity.getLocationName();
+        String trackName = MainActivity.getTrackName();
         try {
             Track track = getHelper().getTrackByName(trackName);
             // If track is running now and locations were added, we should update list element
@@ -100,7 +100,7 @@ public class TracksActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Location location = intent.getParcelableExtra(getString(R.string.intent_location_changed));
-            childItems.get(MainActivity.getLocationName()).add(locationToString(location));
+            childItems.get(MainActivity.getTrackName()).add(locationToString(location));
             adapter.notifyDataSetChanged();
         }
     }

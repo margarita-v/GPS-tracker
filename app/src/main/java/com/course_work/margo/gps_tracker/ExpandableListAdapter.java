@@ -130,7 +130,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View v) {
                 // if chosen route is tracking now
-                if (Objects.equals(MainActivity.getLocationName(), headerTitle))
+                if (Objects.equals(MainActivity.getTrackName(), headerTitle))
                     MainActivity.createAlertDialog(context, R.string.delete_error_title, R.string.delete_error_message);
                 else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);

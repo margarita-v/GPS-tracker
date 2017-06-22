@@ -17,6 +17,9 @@ public class Track {
     public  static final String FIELD_NAME_NAME      = "name";
     private static final String FIELD_NAME_LOCATIONS = "locations";
 
+    public static final int MAX_COUNT_OF_LOCATIONS     = 5000;
+    public static final int COUNT_OF_DELETED_LOCATIONS = 200;
+
     @DatabaseField(columnName = FIELD_NAME_ID, generatedId = true)
     private int id;
 
