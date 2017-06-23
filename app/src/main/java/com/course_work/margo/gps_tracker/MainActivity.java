@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
     private Location mCurrentLocation;
     private Track currentTrack;
     private Intent serviceIntent;
+    private int locationsCount;
 
     private static final int MAX = 30;
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -253,12 +254,15 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             currentTrack = new Track();
             trackName = dateFormat.format(calendar.getTime());
             currentTrack.setName(trackName);
+            locationsCount = 0;
             try {
                 trackDao.create(currentTrack);
             } catch (SQLException e) {
                 Log.d(TAG, "Can't create new track");
             }
         }
+        else
+            locationsCount = currentTrack.getLocations().size();
         changeState(false, false);
         tvLocation.setText(R.string.alert_waiting_title);
         locationSettingsSuccess.onAcceptLocationSettings();
@@ -318,7 +322,12 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
         @Override
         public void onReceive(Context context, Intent intent) {
             mCurrentLocation = intent.getParcelableExtra(getString(R.string.intent_location_changed));
+            locationsCount++;
             try {
+                if (locationsCount > Track.MAX_COUNT_OF_LOCATIONS) {
+                    getHelper().deleteFirstLocations(trackName);
+                    locationsCount = Track.MAX_COUNT_OF_LOCATIONS - Track.COUNT_OF_DELETED_LOCATIONS + 1;
+                }
                 locationDao.create(new TrackItem(mCurrentLocation, currentTrack));
             } catch (SQLException e) {
                 Log.d(TAG, "Can't create locationDao");

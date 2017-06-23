@@ -8,12 +8,13 @@ import com.course_work.margo.gps_tracker.models.Track;
 import com.course_work.margo.gps_tracker.models.TrackItem;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 class DatabaseHelper extends OrmLiteSqliteOpenHelper{
     private static final String DATABASE_NAME = "tracks.db";
@@ -77,11 +78,19 @@ class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     void deleteTrackByName(String name) throws SQLException {
         Track track = getTrackByName(name);
-        int trackId = track.getId();
-        getTrackDao().delete(track);
         // Delete all locations for this track
-        DeleteBuilder deleteBuilder = getLocationDao().deleteBuilder();
-        deleteBuilder.where().eq(TrackItem.FIELD_NAME_TRACK, trackId);
-        getLocationDao().delete(deleteBuilder.prepare());
+        getLocationDao().delete(track.getLocations());
+        getTrackDao().delete(track);
+    }
+
+    void deleteFirstLocations(String trackName) throws SQLException {
+        int i = 0;
+        Track track = getTrackByName(trackName);
+        List<TrackItem> deletedLocations = new ArrayList<>();
+        for (TrackItem location: track.getLocations()) {
+            deletedLocations.add(location);
+            if (++i == Track.COUNT_OF_DELETED_LOCATIONS) break;
+        }
+        getLocationDao().delete(deletedLocations);
     }
 }
