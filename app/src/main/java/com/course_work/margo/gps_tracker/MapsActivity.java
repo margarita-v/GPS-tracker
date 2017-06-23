@@ -27,6 +27,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private Track currentTrack;
     private LatLng lastPoint;
+    private boolean draw = true;
+    private boolean isTrackingRoute;
 
     private static final int LINE_WIDTH = 5;
     private static final int ZOOM_LEVEL = 17;
@@ -64,7 +66,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         setTitle(trackName);
         // Receive location updates from location service
-        boolean isTrackingRoute = Objects.equals(MainActivity.getTrackName(), trackName);
+        isTrackingRoute = Objects.equals(MainActivity.getTrackName(), trackName);
         if (isTrackingRoute)
             registerReceiver(locationReceiver, intentFilter);
     }
@@ -83,11 +85,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .geodesic(true);
         mMap.addPolyline(trackOptions);
 
-        // add marker in each point pf track
+        // add markers
         for (LatLng latLng: items) {
-            mMap.addMarker(new MarkerOptions().position(latLng));
+            if (draw)
+                mMap.addMarker(new MarkerOptions().position(latLng));
+            draw = !draw;
         }
         lastPoint = items.get(items.size() - 1);
+        if (!isTrackingRoute && draw)
+            mMap.addMarker(new MarkerOptions().position(lastPoint));
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint, ZOOM_LEVEL));
     }
@@ -104,7 +110,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .width(LINE_WIDTH)
                     .geodesic(true);
             mMap.addPolyline(trackOptions);
-            mMap.addMarker(new MarkerOptions().position(newPoint));
+            if (draw)
+                mMap.addMarker(new MarkerOptions().position(newPoint));
+            draw = !draw;
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newPoint, ZOOM_LEVEL));
             lastPoint = newPoint;
         }

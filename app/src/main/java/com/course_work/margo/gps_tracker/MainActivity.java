@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements ResultCallback<Lo
             }
         }
         else
-            locationsCount = currentTrack.getLocations().size();
+            locationsCount = currentTrack.getLocations() != null ? currentTrack.getLocations().size() : 0;
         changeState(false, false);
         tvLocation.setText(R.string.alert_waiting_title);
         locationSettingsSuccess.onAcceptLocationSettings();

@@ -28,10 +28,12 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     private LocationSettingsRequest mLocationSettingsRequest;
     private static LocationSettingsCallback locationSettingsCallback;
 
-    private static final long UPDATE_INTERVAL = 3000;
-    private static final long FASTEST_INTERVAL = 2000;
+    private static final long UPDATE_INTERVAL = 2000;
+    private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
+    private static final int    ACCURACY = 50;
     private static final double MIN_DIFFERENCE = 0.0001;
+    private static final double MAX_DIFFERENCE = 0.01;
     private static final double DIFFERENCE_FOR_ONE_DIMENSION = 2*MIN_DIFFERENCE;
 
     public static void setLocationSettingsCallback(LocationSettingsCallback callback) {
@@ -116,7 +118,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onLocationChanged(Location location) {
-        if (location.getAccuracy() < 100 && checkDifference(location.getLatitude(), location.getLongitude())) {
+        if (location.getAccuracy() < ACCURACY && checkDifference(location.getLatitude(), location.getLongitude())) {
             mLastLocation = location;
             Intent intent = new Intent(getString(R.string.intent_broadcast));
             intent.putExtra(getString(R.string.intent_location_changed), location);
@@ -129,7 +131,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             return true;
         double latDif = Math.abs(mLastLocation.getLatitude() - latitude);
         double longDif = Math.abs(mLastLocation.getLongitude() - longitude);
-        return latDif >= MIN_DIFFERENCE && longDif >= MIN_DIFFERENCE ||
-                latDif >= DIFFERENCE_FOR_ONE_DIMENSION || longDif >= DIFFERENCE_FOR_ONE_DIMENSION;
+        return (latDif >= MIN_DIFFERENCE && longDif >= MIN_DIFFERENCE ||
+                latDif >= DIFFERENCE_FOR_ONE_DIMENSION || longDif >= DIFFERENCE_FOR_ONE_DIMENSION) &&
+                latDif <= MAX_DIFFERENCE && longDif <= MAX_DIFFERENCE;
     }
 }

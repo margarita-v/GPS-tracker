@@ -14,7 +14,7 @@ public class TrackItem {
     private static final String FIELD_NAME_LONGITUDE = "longitude";
     private static final String FIELD_NAME_TIME      = "time";
     private static final String FIELD_NAME_SPEED     = "speed";
-    public  static final String FIELD_NAME_TRACK     = "track";
+    private static final String FIELD_NAME_TRACK     = "track";
 
     @DatabaseField(columnName = FIELD_NAME_ID, generatedId = true)
     private int id;
