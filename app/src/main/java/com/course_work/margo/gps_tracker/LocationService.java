@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsSuccess;
@@ -31,7 +32,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     private static final long UPDATE_INTERVAL = 2000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
-    private static final int    ACCURACY = 50;
+    private static final int    ACCURACY = 100;
     private static final double MIN_DIFFERENCE = 0.0001;
     private static final double MAX_DIFFERENCE = 0.01;
     private static final double DIFFERENCE_FOR_ONE_DIMENSION = 2*MIN_DIFFERENCE;
@@ -118,12 +119,18 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onLocationChanged(Location location) {
-        if (location.getAccuracy() < ACCURACY && checkDifference(location.getLatitude(), location.getLongitude())) {
+        boolean check = checkDifference(location.getLatitude(), location.getLongitude());
+        if (location.getAccuracy() < ACCURACY && check) {//checkDifference(location.getLatitude(), location.getLongitude())) {
             mLastLocation = location;
             Intent intent = new Intent(getString(R.string.intent_broadcast));
             intent.putExtra(getString(R.string.intent_location_changed), location);
             sendBroadcast(intent);
         }
+        Toast.makeText(this,
+                Boolean.toString(check) + "\n" +
+                Float.toString(location.getAccuracy()) + "\n" +
+                Double.toString(location.getLatitude()) + "\n" +
+                Double.toString(location.getLongitude()), Toast.LENGTH_SHORT).show();
     }
 
     private boolean checkDifference(double latitude, double longitude) {
