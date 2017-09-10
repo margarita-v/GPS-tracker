@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.widget.Toast;
 
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsSuccess;
@@ -28,12 +29,15 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     private LocationSettingsRequest mLocationSettingsRequest;
     private static LocationSettingsCallback locationSettingsCallback;
 
+    // Frequency for location requests
     private static final long UPDATE_INTERVAL = 2000;
     private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;
 
-    private static final int    ACCURACY = 50;
-    private static final double MIN_DIFFERENCE = 0.0001;
-    private static final double MAX_DIFFERENCE = 0.01;
+    // Max accuracy for each location
+    private static final int    ACCURACY = 300;
+    // Compare coordinates of previous and current locations
+    private static final double MIN_DIFFERENCE = 0.00005;
+    private static final double MAX_DIFFERENCE = 0.05;
     private static final double DIFFERENCE_FOR_ONE_DIMENSION = 2*MIN_DIFFERENCE;
 
     public static void setLocationSettingsCallback(LocationSettingsCallback callback) {
@@ -118,12 +122,22 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onLocationChanged(Location location) {
-        if (location.getAccuracy() < ACCURACY && checkDifference(location.getLatitude(), location.getLongitude())) {
+        boolean check = checkDifference(location.getLatitude(), location.getLongitude());
+        boolean isFirstLocation = mLastLocation == null;
+        //if (!isFirstLocation && check || isFirstLocation && location.getAccuracy() < ACCURACY) {
+        if (location.getAccuracy() < ACCURACY && check) {//checkDifference(location.getLatitude(), location.getLongitude())) {
             mLastLocation = location;
             Intent intent = new Intent(getString(R.string.intent_broadcast));
             intent.putExtra(getString(R.string.intent_location_changed), location);
             sendBroadcast(intent);
         }
+        else
+            Toast.makeText(this,
+                    Boolean.toString(check) + "\n" +
+                            Float.toString(location.getAccuracy()) + "\n" +
+                            Float.toString(location.getSpeed()) + "\n" +
+                            Double.toString(location.getLatitude()) + "\n" +
+                            Double.toString(location.getLongitude()), Toast.LENGTH_SHORT).show();
     }
 
     private boolean checkDifference(double latitude, double longitude) {
