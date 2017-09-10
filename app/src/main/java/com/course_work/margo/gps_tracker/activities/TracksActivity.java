@@ -1,4 +1,4 @@
-package com.course_work.margo.gps_tracker;
+package com.course_work.margo.gps_tracker.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ExpandableListView;
 
+import com.course_work.margo.gps_tracker.R;
+import com.course_work.margo.gps_tracker.adapter.ExpandableListAdapter;
+import com.course_work.margo.gps_tracker.database.DatabaseHelper;
 import com.course_work.margo.gps_tracker.models.Track;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;

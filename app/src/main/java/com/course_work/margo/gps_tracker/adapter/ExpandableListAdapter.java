@@ -1,4 +1,4 @@
-package com.course_work.margo.gps_tracker;
+package com.course_work.margo.gps_tracker.adapter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,6 +13,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.course_work.margo.gps_tracker.R;
+import com.course_work.margo.gps_tracker.activities.MainActivity;
+import com.course_work.margo.gps_tracker.activities.MapsActivity;
+import com.course_work.margo.gps_tracker.database.DatabaseHelper;
 import com.course_work.margo.gps_tracker.models.Track;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
@@ -22,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-class ExpandableListAdapter extends BaseExpandableListAdapter {
+public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<String> trackHeaders;
@@ -40,7 +44,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     //endregion
 
-    ExpandableListAdapter(Context context,
+    public ExpandableListAdapter(Context context,
                           List<String> headers,
                           HashMap<String, List<String>> items) {
         this.context = context;

@@ -1,4 +1,4 @@
-package com.course_work.margo.gps_tracker;
+package com.course_work.margo.gps_tracker.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.course_work.margo.gps_tracker.R;
+import com.course_work.margo.gps_tracker.database.DatabaseHelper;
 import com.course_work.margo.gps_tracker.models.Track;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;

@@ -1,4 +1,4 @@
-package com.course_work.margo.gps_tracker;
+package com.course_work.margo.gps_tracker.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-class DatabaseHelper extends OrmLiteSqliteOpenHelper{
+public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
     private static final String DATABASE_NAME = "tracks.db";
     private static final int DATABASE_VERSION = 1;
 
@@ -56,34 +56,34 @@ class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         super.close();
     }
 
-    Dao<Track, Integer> getTrackDao() throws SQLException {
+    public Dao<Track, Integer> getTrackDao() throws SQLException {
         if (trackDao == null) {
             trackDao = getDao(Track.class);
         }
         return trackDao;
     }
 
-    Dao<TrackItem, Integer> getLocationDao() throws SQLException {
+    public Dao<TrackItem, Integer> getLocationDao() throws SQLException {
         if (locationDao == null) {
             locationDao = getDao(TrackItem.class);
         }
         return locationDao;
     }
 
-    Track getTrackByName(String name) throws SQLException {
+    public Track getTrackByName(String name) throws SQLException {
         QueryBuilder<Track, Integer> queryBuilder = getTrackDao().queryBuilder();
         queryBuilder.where().eq(Track.FIELD_NAME_NAME, name);
         return getTrackDao().queryForFirst(queryBuilder.prepare());
     }
 
-    void deleteTrackByName(String name) throws SQLException {
+    public void deleteTrackByName(String name) throws SQLException {
         Track track = getTrackByName(name);
         // Delete all locations for this track
         getLocationDao().delete(track.getLocations());
         getTrackDao().delete(track);
     }
 
-    void deleteFirstLocations(String trackName) throws SQLException {
+    public void deleteFirstLocations(String trackName) throws SQLException {
         int i = 0;
         Track track = getTrackByName(trackName);
         List<TrackItem> deletedLocations = new ArrayList<>();

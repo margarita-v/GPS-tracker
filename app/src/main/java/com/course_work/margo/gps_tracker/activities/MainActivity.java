@@ -1,4 +1,4 @@
-package com.course_work.margo.gps_tracker;
+package com.course_work.margo.gps_tracker.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -23,6 +23,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.Manifest;
 
+import com.course_work.margo.gps_tracker.database.DatabaseHelper;
+import com.course_work.margo.gps_tracker.service.LocationService;
+import com.course_work.margo.gps_tracker.R;
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsSuccess;
 import com.course_work.margo.gps_tracker.models.Track;

@@ -1,4 +1,4 @@
-package com.course_work.margo.gps_tracker;
+package com.course_work.margo.gps_tracker.service;
 
 import android.app.Service;
 import android.content.Intent;
@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
+import com.course_work.margo.gps_tracker.R;
+import com.course_work.margo.gps_tracker.activities.MainActivity;
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsCallback;
 import com.course_work.margo.gps_tracker.interfaces.LocationSettingsSuccess;
 import com.google.android.gms.common.ConnectionResult;
